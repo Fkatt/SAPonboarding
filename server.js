@@ -545,6 +545,18 @@ app.post('/submit-application', async (req, res) => {
             });
         }
 
+        // Create submission notification
+        await db.insertNotification({
+            workflow_id: workflowId,
+            applicant_email: formData.applicant_email,
+            type: 'SUBMISSION',
+            title: 'Application Submitted Successfully',
+            message: `Your vendor application for "${formData.business_name}" has been submitted and is now under review by our approval team.`,
+            action_required: false,
+            department: 'System',
+            guidance: 'We will notify you as each department reviews your application. You can track the progress in the applications section.'
+        });
+
         res.json({
             success: true,
             workflowId: workflowId,
@@ -597,6 +609,40 @@ app.post('/approver-response', async (req, res) => {
             status: decision,
             details: `Approver ${approverId} ${decision.toLowerCase()}: ${reason || 'No reason provided'}`
         });
+
+        // Create notification for individual approver response
+        const departmentMapping = {
+            '1': 'Finance Department',
+            '2': 'Legal Department', 
+            '3': 'Procurement Department'
+        };
+        const departmentName = departmentMapping[approverId] || `Department ${approverId}`;
+        
+        if (decision === 'APPROVED') {
+            await db.insertNotification({
+                workflow_id: workflowId,
+                applicant_email: workflow.applicant_email,
+                type: 'APPROVAL',
+                title: `✅ Approved by ${departmentName}`,
+                message: `Great news! Your vendor application for "${workflow.business_name}" has been approved by the ${departmentName}.`,
+                action_required: false,
+                department: departmentName,
+                guidance: 'Your application is progressing through the approval process. We will notify you when all departments have completed their review.'
+            });
+        } else if (decision === 'REJECTED') {
+            // This creates a notification but the rejection webhook should also create one with more details
+            await db.insertNotification({
+                workflow_id: workflowId,
+                applicant_email: workflow.applicant_email,
+                type: 'REJECTION',
+                title: `❌ Rejected by ${departmentName}`,
+                message: `Your vendor application for "${workflow.business_name}" has been rejected by the ${departmentName}. Reason: ${reason || 'No specific reason provided'}`,
+                action_required: true,
+                department: departmentName,
+                rejection_reason: reason || 'No specific reason provided',
+                guidance: `Please review the feedback from ${departmentName} and make the necessary corrections to your application. Once updated, you may resubmit your vendor application for review.`
+            });
+        }
 
         // Update dynamic environment and trigger Newman
         try {
@@ -866,6 +912,18 @@ app.post('/approval', async (req, res) => {
                 type: 'WEBHOOK',
                 status: 'APPROVED',
                 details: `Final approval received from Orkes webhook (identified by ${identifiedBy})`
+            });
+            
+            // Create final approval notification
+            await db.insertNotification({
+                workflow_id: workflow.workflow_id,
+                applicant_email: workflow.applicant_email,
+                type: 'FINAL_APPROVAL',
+                title: '🎉 Application Fully Approved!',
+                message: `Congratulations! Your vendor application for "${workflow.business_name}" has been approved by all departments and is now complete.`,
+                action_required: false,
+                department: 'All Departments',
+                guidance: 'Your vendor account will be activated shortly. You will receive separate confirmation once your account is ready for use.'
             });
             
             // Cleanup dynamic environment
