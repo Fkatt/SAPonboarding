@@ -9,13 +9,13 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const FileStorage = require('./file-storage');
+const MongoStorage = require('./mongo-storage');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Initialize file storage
-const db = new FileStorage();
+// Initialize MongoDB storage
+const db = new MongoStorage();
 
 // Security middleware
 app.use(helmet({
