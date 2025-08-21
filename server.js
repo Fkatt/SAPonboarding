@@ -379,8 +379,8 @@ app.post('/approver-response', async (req, res) => {
                 
                 await fs.writeJson(envPath, env, { spaces: 2 });
                 
-                // First get fresh JWT token, then submit approver response
-                await runNewmanCollection(collectionPath, envPath, ['1. Get JWT Token', '4a. Submit Single Approver Response']);
+                // Trust the collection-level auth that works in Postman
+                await runNewmanCollection(collectionPath, envPath, '4a. Submit Single Approver Response');
                 console.log(`Approver ${approverId} response submitted to Orkes`);
             }
         } catch (newmanError) {
