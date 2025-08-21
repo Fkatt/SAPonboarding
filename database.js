@@ -134,6 +134,26 @@ class DatabaseManager {
         }
     }
 
+    getWorkflowById(workflowId) {
+        try {
+            const stmt = this.db.prepare('SELECT * FROM workflows WHERE workflow_id = ?');
+            return stmt.get(workflowId);
+        } catch (error) {
+            console.error('Database error (getWorkflowById):', error);
+            return null;
+        }
+    }
+
+    getWorkflowByApplicantEmail(applicantEmail) {
+        try {
+            const stmt = this.db.prepare('SELECT * FROM workflows WHERE applicant_email = ? ORDER BY created_at DESC LIMIT 1');
+            return stmt.get(applicantEmail);
+        } catch (error) {
+            console.error('Database error (getWorkflowByApplicantEmail):', error);
+            return null;
+        }
+    }
+
     getWorkflows() {
         try {
             const stmt = this.db.prepare(`

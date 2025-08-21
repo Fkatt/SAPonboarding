@@ -666,23 +666,39 @@ app.post('/webhook', async (req, res) => {
 // Orkes webhook endpoints
 app.post('/approval', async (req, res) => {
     try {
-        console.log('Received approval webhook:', req.body);
+        console.log('Received approval webhook:', JSON.stringify(req.body, null, 2));
         
-        const workflowId = req.body.workflowId || req.body.workflow_id;
+        // Extract applicant email from Orkes webhook payload
+        const applicantEmail = req.body.email || req.body.complete_submission?.applicant_email;
+        const businessName = req.body.business_name || req.body.complete_submission?.application_data?.business_name;
         
-        if (workflowId) {
-            await db.updateWorkflowStatus(workflowId, 'APPROVED');
-            await db.insertTransaction({
-                workflow_id: workflowId,
-                type: 'WEBHOOK',
-                status: 'APPROVED',
-                details: 'Final approval received from Orkes'
-            });
+        console.log(`Looking for workflow with applicant_email: ${applicantEmail} and business_name: ${businessName}`);
+        
+        if (applicantEmail) {
+            // Find the workflow by applicant email
+            const workflow = await db.getWorkflowByApplicantEmail(applicantEmail);
             
-            // Cleanup dynamic environment
-            await cleanupDynamicEnvironment(workflowId);
-            
-            console.log(`Workflow ${workflowId} approved`);
+            if (workflow) {
+                console.log(`Found workflow: ${workflow.workflow_id} for approval`);
+                
+                await db.updateWorkflowStatus(workflow.workflow_id, 'APPROVED');
+                
+                await db.insertTransaction({
+                    workflow_id: workflow.workflow_id,
+                    type: 'WEBHOOK',
+                    status: 'APPROVED',
+                    details: 'Final approval received from Orkes webhook'
+                });
+                
+                // Cleanup dynamic environment
+                await cleanupDynamicEnvironment(workflow.workflow_id);
+                
+                console.log(`Workflow ${workflow.workflow_id} approved successfully`);
+            } else {
+                console.log(`No workflow found for applicant email: ${applicantEmail}`);
+            }
+        } else {
+            console.log('No applicant email found in webhook payload');
         }
         
         res.json({
@@ -700,23 +716,39 @@ app.post('/approval', async (req, res) => {
 
 app.post('/rejection', async (req, res) => {
     try {
-        console.log('Received rejection webhook:', req.body);
+        console.log('Received rejection webhook:', JSON.stringify(req.body, null, 2));
         
-        const workflowId = req.body.workflowId || req.body.workflow_id;
+        // Extract applicant email from Orkes webhook payload  
+        const applicantEmail = req.body.email || req.body.complete_submission?.applicant_email;
+        const businessName = req.body.business_name || req.body.complete_submission?.application_data?.business_name;
         
-        if (workflowId) {
-            await db.updateWorkflowStatus(workflowId, 'REJECTED');
-            await db.insertTransaction({
-                workflow_id: workflowId,
-                type: 'WEBHOOK',
-                status: 'REJECTED',
-                details: 'Final rejection received from Orkes'
-            });
+        console.log(`Looking for workflow with applicant_email: ${applicantEmail} for rejection`);
+        
+        if (applicantEmail) {
+            // Find the workflow by applicant email
+            const workflow = await db.getWorkflowByApplicantEmail(applicantEmail);
             
-            // Cleanup dynamic environment
-            await cleanupDynamicEnvironment(workflowId);
-            
-            console.log(`Workflow ${workflowId} rejected`);
+            if (workflow) {
+                console.log(`Found workflow: ${workflow.workflow_id} for rejection`);
+                
+                await db.updateWorkflowStatus(workflow.workflow_id, 'REJECTED');
+                
+                await db.insertTransaction({
+                    workflow_id: workflow.workflow_id,
+                    type: 'WEBHOOK',
+                    status: 'REJECTED',
+                    details: 'Final rejection received from Orkes webhook'
+                });
+                
+                // Cleanup dynamic environment
+                await cleanupDynamicEnvironment(workflow.workflow_id);
+                
+                console.log(`Workflow ${workflow.workflow_id} rejected successfully`);
+            } else {
+                console.log(`No workflow found for applicant email: ${applicantEmail}`);
+            }
+        } else {
+            console.log('No applicant email found in rejection webhook payload');
         }
         
         res.json({
