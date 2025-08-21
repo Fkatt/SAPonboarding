@@ -184,7 +184,7 @@ async function updateDynamicEnvironment(workflowId, newmanEnvironment) {
             // Update with values from Newman (like JWT token and task IDs)
             const updatedValues = [...currentEnv.values];
             
-            console.log(`Processing ${newmanEnvironment.values.length} environment variables from Newman`);
+            console.log(`Processing ${newmanEnvironment.values ? newmanEnvironment.values.length : 0} environment variables from Newman`);
             
             newmanEnvironment.values.forEach(newVar => {
                 if (newVar.key && newVar.value) {
@@ -351,10 +351,11 @@ app.post('/submit-application', async (req, res) => {
             // Save the JWT token and other variables back to the dynamic environment file
             // This ensures the token is available for later approver responses
             if (result.environment) {
-                console.log('Captured environment from Newman:', JSON.stringify(result.environment, null, 2));
+                console.log('Full Newman result environment:', JSON.stringify(result.environment, null, 2));
                 await updateDynamicEnvironment(workflowId, result.environment);
             } else {
                 console.log('Warning: No environment returned from Newman execution');
+                console.log('Full Newman result:', JSON.stringify(result, null, 2));
             }
             
             await db.insertTransaction({
