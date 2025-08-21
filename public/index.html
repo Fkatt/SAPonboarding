@@ -1473,12 +1473,17 @@
 
             let html = '';
             transactions.forEach(tx => {
-                // Parse details if it's JSON
+                // Parse details if it's JSON string, or use directly if already an object
                 let parsedDetails = null;
                 try {
-                    parsedDetails = tx.details ? JSON.parse(tx.details) : null;
+                    if (typeof tx.details === 'string') {
+                        parsedDetails = JSON.parse(tx.details);
+                    } else if (typeof tx.details === 'object' && tx.details !== null) {
+                        parsedDetails = tx.details;
+                    }
                 } catch (e) {
-                    // If not JSON, use as is
+                    // If parsing fails, use as string
+                    console.error('Error parsing transaction details:', e);
                 }
 
                 // Format details display
@@ -1486,13 +1491,18 @@
                 if (tx.type === 'REJECTION' && parsedDetails) {
                     detailsDisplay = `
                         <div class="transaction-details rejection-details">
-                            <strong>${parsedDetails.rejecting_department}</strong><br>
-                            <span class="rejection-reason">Reason: ${parsedDetails.rejection_reason}</span>
+                            <strong>${parsedDetails.rejecting_department || 'Unknown Department'}</strong><br>
+                            <span class="rejection-reason">Reason: ${parsedDetails.rejection_reason || 'No reason provided'}</span>
                             ${parsedDetails.rejection_details ? `<br><span class="rejection-details-text">${parsedDetails.rejection_details}</span>` : ''}
                         </div>
                     `;
                 } else {
-                    detailsDisplay = tx.details || '';
+                    // For non-rejection transactions or when parsing fails, show as string
+                    if (typeof tx.details === 'object' && tx.details !== null) {
+                        detailsDisplay = JSON.stringify(tx.details, null, 2);
+                    } else {
+                        detailsDisplay = tx.details || '';
+                    }
                 }
 
                 html += `
