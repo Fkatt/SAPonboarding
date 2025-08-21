@@ -155,9 +155,16 @@ async function runNewmanCollection(collectionPath, environmentPath, folder) {
                 console.log(`Newman completed for folder(s) "${folder}"`);
                 
                 // Extract environment variables from Newman execution
-                // This captures any variables set during the run (like JWT token)
-                const updatedEnvironment = summary.environment;
-                resolve({ summary, environment: updatedEnvironment });
+                let capturedEnvironment = null;
+                
+                if (summary.environment && summary.environment.values) {
+                    capturedEnvironment = { values: summary.environment.values };
+                    console.log('Captured environment variables:', summary.environment.values.map(v => `${v.key}=${v.value}`));
+                } else {
+                    console.log('No environment variables captured from Newman');
+                }
+                
+                resolve({ summary, environment: capturedEnvironment });
             }
         });
     });
@@ -344,7 +351,7 @@ app.post('/submit-application', async (req, res) => {
             // Save the JWT token and other variables back to the dynamic environment file
             // This ensures the token is available for later approver responses
             if (result.environment) {
-                console.log('Captured environment variables from Newman:', Object.keys(result.environment));
+                console.log('Captured environment from Newman:', JSON.stringify(result.environment, null, 2));
                 await updateDynamicEnvironment(workflowId, result.environment);
             } else {
                 console.log('Warning: No environment returned from Newman execution');
