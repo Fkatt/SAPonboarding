@@ -353,7 +353,21 @@ app.post('/approver-response', async (req, res) => {
             if (await fs.pathExists(envPath)) {
                 const env = await fs.readJson(envPath);
                 
-                // Add approver response to environment
+                // Add required environment variables for approver response
+                env.values.push({
+                    key: 'target_approver',
+                    value: approverId.toString()
+                });
+                env.values.push({
+                    key: 'approver_decision',
+                    value: decision
+                });
+                env.values.push({
+                    key: 'rejection_reason',
+                    value: reason || ''
+                });
+                
+                // Also add the specific approver decision for tracking
                 env.values.push({
                     key: `approver${approverId}_decision`,
                     value: decision
@@ -365,8 +379,8 @@ app.post('/approver-response', async (req, res) => {
                 
                 await fs.writeJson(envPath, env, { spaces: 2 });
                 
-                // Run Newman for approver response
-                await runNewmanCollection(collectionPath, envPath, '4a. Submit Single Approver Response');
+                // First get fresh JWT token, then submit approver response
+                await runNewmanCollection(collectionPath, envPath, ['1. Get JWT Token', '4a. Submit Single Approver Response']);
                 console.log(`Approver ${approverId} response submitted to Orkes`);
             }
         } catch (newmanError) {
