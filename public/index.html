@@ -933,8 +933,8 @@
             let html = '';
             applications.forEach(app => {
                 const formData = app.form_data || {};
-                const fileLinks = app.file_urls.map((url, index) => 
-                    `<a href="${url}" target="_blank" class="file-link">${app.file_names[index] || 'Document'}</a>`
+                const fileLinks = (app.file_urls || []).map((url, index) => 
+                    `<a href="${url}" target="_blank" class="file-link">${(app.file_names || [])[index] || 'Document'}</a>`
                 ).join(', ');
 
                 html += `
@@ -1021,8 +1021,8 @@
 
             let html = '';
             applications.forEach(app => {
-                const fileLinks = app.file_urls.map((url, index) => 
-                    `<a href="${url}" target="_blank" class="file-link">${app.file_names[index] || 'Document'}</a>`
+                const fileLinks = (app.file_urls || []).map((url, index) => 
+                    `<a href="${url}" target="_blank" class="file-link">${(app.file_names || [])[index] || 'Document'}</a>`
                 ).join('<br>');
 
                 html += `
