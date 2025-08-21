@@ -1,166 +1,12 @@
 {
 	"info": {
-		"_postman_id": "4520b69b-423c-413c-93cb-414ff93e0bcc",
+		"_postman_id": "6cd8ee0d-f233-4391-88bb-3d68e603fa17",
 		"name": "Orkes Onboarding Workflow API - Complete",
 		"description": "A complete, automated collection to interact with the v3 onboarding workflow. Designed for use with Newman and includes individual approver response handling.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20308975"
 	},
 	"item": [
-		{
-			"name": "1. Get JWT Token",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"// This script runs AFTER the request and saves the token.",
-							"const response = pm.response.json();",
-							"const token = response.token;",
-							"if (token) {",
-							"    pm.environment.set(\"orkes_jwt\", token);",
-							"    console.log(\"Orkes JWT Token has been saved automatically.\");",
-							"}"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"keyId\": \"{{KEY}}\",\n  \"keySecret\": \"{{SECRET}}\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseURL}}/api/token",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"api",
-						"token"
-					]
-				},
-				"description": "Fetches a temporary JWT token using the permanent API Key and Secret."
-			},
-			"response": []
-		},
-		{
-			"name": "2. Start Onboarding Workflow",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"// This script runs AFTER the request and saves the workflow ID.",
-							"const workflowId = pm.response.text();",
-							"if (workflowId) {",
-							"    pm.environment.set(\"workflowId\", workflowId);",
-							"    console.log(\"Workflow ID saved: \" + workflowId);",
-							"}"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"name\": \"onboarding_approval_workflow_v3\",\n  \"version\": 1,\n  \"input\": {\n    \"applicant_email\": \"{{contact_email}}\",\n    \"application_data\": {\n      \"business_name\": \"{{business_name}}\",\n      \"business_contact_number\": \"{{business_contact_number}}\",\n      \"address\": \"{{address}}\",\n      \"business_license_id\": \"{{business_license_id}}\",\n      \"compliance_documents\": [\n        \"{{compliance_document_url_1}}\",\n        \"{{compliance_document_url_2}}\"\n      ]\n    },\n    \"approver1_email\": \"{{approver1_email}}\",\n    \"approver2_email\": \"{{approver2_email}}\",\n    \"approver3_email\": \"{{approver3_email}}\"\n  }\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseURL}}/api/workflow",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"api",
-						"workflow"
-					]
-				},
-				"description": "Starts the v3 onboarding workflow with detailed vendor data and saves the resulting workflowInstanceId."
-			},
-			"response": []
-		},
-		{
-			"name": "3. Get Running Task IDs",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"// This script finds the 3 parallel approval task IDs and saves them.",
-							"const response = pm.response.json();",
-							"if (response && response.tasks) {",
-							"    // Look for direct USER_TASK references (no loops)",
-							"    const approver1_task = response.tasks.find(t => t.referenceTaskName === 'approver_1_task_ref' && t.taskType === 'USER_TASK');",
-							"    const approver2_task = response.tasks.find(t => t.referenceTaskName === 'approver_2_task_ref' && t.taskType === 'USER_TASK');",
-							"    const approver3_task = response.tasks.find(t => t.referenceTaskName === 'approver_3_task_ref' && t.taskType === 'USER_TASK');",
-							"",
-							"    if(approver1_task) pm.environment.set(\"approver1_taskId\", approver1_task.taskId);",
-							"    if(approver2_task) pm.environment.set(\"approver2_taskId\", approver2_task.taskId);",
-							"    if(approver3_task) pm.environment.set(\"approver3_taskId\", approver3_task.taskId);",
-							"",
-							"    console.log(\"Approver Task IDs saved.\");",
-							"    console.log(\"Approver 1 Task ID: \" + (approver1_task ? approver1_task.taskId : 'Not found'));",
-							"    console.log(\"Approver 2 Task ID: \" + (approver2_task ? approver2_task.taskId : 'Not found'));",
-							"    console.log(\"Approver 3 Task ID: \" + (approver3_task ? approver3_task.taskId : 'Not found'));",
-							"    ",
-							"    // Debug: Show all task reference names",
-							"    console.log(\"All task reference names found:\");",
-							"    response.tasks.forEach(task => {",
-							"        console.log(`- ${task.referenceTaskName} (${task.taskType}, Status: ${task.status})`);",
-							"    });",
-							"}"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {},
-				"url": {
-					"raw": "{{baseURL}}/api/workflow/{{workflowId}}?includeTasks=true",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"api",
-						"workflow",
-						"{{workflowId}}"
-					],
-					"query": [
-						{
-							"key": "includeTasks",
-							"value": "true"
-						}
-					]
-				},
-				"description": "Fetches the workflow details to find the unique task IDs for the three parallel approvers."
-			},
-			"response": []
-		},
 		{
 			"name": "4. Individual Approver Response Handler",
 			"item": [
@@ -174,7 +20,7 @@
 									"// This handles a single approver response",
 									"// Required environment variables from Node.js:",
 									"// - target_approver: '1', '2', or '3'",
-									"// - approver_decision: 'APPROVED' or 'REJECTED'", 
+									"// - approver_decision: 'APPROVED' or 'REJECTED'",
 									"// - rejection_reason: 'reason text' (if rejected)",
 									"",
 									"const targetApprover = pm.environment.get('target_approver');",
@@ -276,8 +122,13 @@
 						},
 						"url": {
 							"raw": "{{baseURL}}/api/tasks",
-							"host": ["{{baseURL}}"],
-							"path": ["api", "tasks"]
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"tasks"
+							]
 						},
 						"description": "Submits a single approver's decision to their specific task. Use target_approver (1,2,3), approver_decision (APPROVED/REJECTED), and rejection_reason environment variables."
 					},
@@ -306,7 +157,7 @@
 									"const approver3Done = tasks.some(t => t.referenceTaskName.startsWith('approver_3_task_ref') && t.taskType === 'USER_TASK' && t.status === 'COMPLETED');",
 									"",
 									"if (approver1Done) completedApprovers++;",
-									"if (approver2Done) completedApprovers++;", 
+									"if (approver2Done) completedApprovers++;",
 									"if (approver3Done) completedApprovers++;",
 									"",
 									"console.log(`Approvers completed: ${completedApprovers}/3`);",
@@ -327,8 +178,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseURL}}/api/workflow/{{workflowId}}?includeTasks=true",
-							"host": ["{{baseURL}}"],
-							"path": ["api", "workflow", "{{workflowId}}"],
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"workflow",
+								"{{workflowId}}"
+							],
 							"query": [
 								{
 									"key": "includeTasks",
@@ -516,6 +373,157 @@
 			]
 		},
 		{
+			"name": "1. Get JWT Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// This script runs AFTER the request and saves the token.",
+							"const response = pm.response.json();",
+							"const token = response.token;",
+							"if (token) {",
+							"    pm.environment.set(\"orkes_jwt\", token);",
+							"    console.log(\"Orkes JWT Token has been saved automatically.\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"keyId\": \"{{KEY}}\",\n  \"keySecret\": \"{{SECRET}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/token",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"token"
+					]
+				},
+				"description": "Fetches a temporary JWT token using the permanent API Key and Secret."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Start Onboarding Workflow",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// This script runs AFTER the request and saves the workflow ID.",
+							"const workflowId = pm.response.text();",
+							"if (workflowId) {",
+							"    pm.environment.set(\"workflowId\", workflowId);",
+							"    console.log(\"Workflow ID saved: \" + workflowId);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"onboarding_approval_workflow_v3\",\n  \"version\": 1,\n  \"input\": {\n    \"applicant_email\": \"{{contact_email}}\",\n    \"application_data\": {\n      \"business_name\": \"{{business_name}}\",\n      \"business_contact_number\": \"{{business_contact_number}}\",\n      \"address\": \"{{address}}\",\n      \"business_license_id\": \"{{business_license_id}}\",\n      \"compliance_documents\": [\n        \"{{compliance_document_url_1}}\",\n        \"{{compliance_document_url_2}}\"\n      ]\n    },\n    \"approver1_email\": \"{{approver1_email}}\",\n    \"approver2_email\": \"{{approver2_email}}\",\n    \"approver3_email\": \"{{approver3_email}}\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/workflow",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"workflow"
+					]
+				},
+				"description": "Starts the v3 onboarding workflow with detailed vendor data and saves the resulting workflowInstanceId."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Get Running Task IDs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// This script finds the 3 parallel approval task IDs and saves them.",
+							"const response = pm.response.json();",
+							"if (response && response.tasks) {",
+							"    // Look for direct USER_TASK references (no loops)",
+							"    const approver1_task = response.tasks.find(t => t.referenceTaskName === 'approver_1_task_ref' && t.taskType === 'USER_TASK');",
+							"    const approver2_task = response.tasks.find(t => t.referenceTaskName === 'approver_2_task_ref' && t.taskType === 'USER_TASK');",
+							"    const approver3_task = response.tasks.find(t => t.referenceTaskName === 'approver_3_task_ref' && t.taskType === 'USER_TASK');",
+							"",
+							"    if(approver1_task) pm.environment.set(\"approver1_taskId\", approver1_task.taskId);",
+							"    if(approver2_task) pm.environment.set(\"approver2_taskId\", approver2_task.taskId);",
+							"    if(approver3_task) pm.environment.set(\"approver3_taskId\", approver3_task.taskId);",
+							"",
+							"    console.log(\"Approver Task IDs saved.\");",
+							"    console.log(\"Approver 1 Task ID: \" + (approver1_task ? approver1_task.taskId : 'Not found'));",
+							"    console.log(\"Approver 2 Task ID: \" + (approver2_task ? approver2_task.taskId : 'Not found'));",
+							"    console.log(\"Approver 3 Task ID: \" + (approver3_task ? approver3_task.taskId : 'Not found'));",
+							"    ",
+							"    // Debug: Show all task reference names",
+							"    console.log(\"All task reference names found:\");",
+							"    response.tasks.forEach(task => {",
+							"        console.log(`- ${task.referenceTaskName} (${task.taskType}, Status: ${task.status})`);",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/api/workflow/{{workflowId}}?includeTasks=true",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"workflow",
+						"{{workflowId}}"
+					],
+					"query": [
+						{
+							"key": "includeTasks",
+							"value": "true"
+						}
+					]
+				},
+				"description": "Fetches the workflow details to find the unique task IDs for the three parallel approvers."
+			},
+			"response": []
+		},
+		{
 			"name": "6. Get Final Workflow Status",
 			"request": {
 				"method": "GET",
@@ -537,11 +545,16 @@
 		}
 	],
 	"auth": {
-		"type": "bearer",
-		"bearer": [
+		"type": "apikey",
+		"apikey": [
 			{
-				"key": "token",
+				"key": "value",
 				"value": "{{orkes_jwt}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "X-Authorization",
 				"type": "string"
 			}
 		]
