@@ -175,7 +175,12 @@ async function updateDynamicEnvironment(workflowId, newmanEnvironment) {
         console.log('Updating dynamic environment for workflow:', workflowId);
         console.log('Newman environment structure:', newmanEnvironment ? Object.keys(newmanEnvironment) : 'null');
         
-        if (newmanEnvironment && newmanEnvironment.values) {
+        console.log('newmanEnvironment type:', typeof newmanEnvironment);
+        console.log('newmanEnvironment keys:', newmanEnvironment ? Object.keys(newmanEnvironment) : 'null');
+        console.log('newmanEnvironment.values type:', typeof newmanEnvironment?.values);
+        console.log('newmanEnvironment.values is Array:', Array.isArray(newmanEnvironment?.values));
+        
+        if (newmanEnvironment && newmanEnvironment.values && Array.isArray(newmanEnvironment.values)) {
             const dynamicEnvPath = path.join(__dirname, 'collections', `dynamic-env-${workflowId}.json`);
             
             // Read current environment
