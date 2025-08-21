@@ -276,6 +276,46 @@ async function cleanupDynamicEnvironment(workflowId) {
 
 // API Routes
 
+// Manual workflow status update endpoint
+app.post('/update-workflow-status', async (req, res) => {
+    try {
+        const { workflowId, status } = req.body;
+        console.log(`Manual status update for workflow: ${workflowId} to ${status}`);
+        
+        if (!['APPROVED', 'REJECTED'].includes(status)) {
+            return res.status(400).json({ success: false, error: 'Status must be APPROVED or REJECTED' });
+        }
+        
+        const workflow = await db.getWorkflowById(workflowId);
+        if (!workflow) {
+            return res.status(404).json({ success: false, error: 'Workflow not found' });
+        }
+        
+        await db.updateWorkflowStatus(workflowId, status);
+        
+        await db.insertTransaction({
+            workflow_id: workflowId,
+            type: 'MANUAL',
+            status: status,
+            details: `Status manually updated to ${status}`
+        });
+        
+        // Clean up dynamic environment file
+        await cleanupDynamicEnvironment(workflowId);
+        
+        res.json({ 
+            success: true, 
+            message: `Workflow ${workflowId} status updated to ${status}` 
+        });
+    } catch (error) {
+        console.error('Manual status update error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Manual workflow status check endpoint
 app.post('/check-workflow-status', async (req, res) => {
     try {
@@ -295,7 +335,8 @@ app.post('/check-workflow-status', async (req, res) => {
         res.json({ 
             success: true, 
             workflow: workflow,
-            message: `Workflow ${workflowId} status: ${workflow.status}` 
+            message: `Workflow ${workflowId} status: ${workflow.status}`,
+            suggestion: workflow.status === 'RUNNING' ? 'If all approvers have approved in Orkes, manually update status to APPROVED' : null
         });
     } catch (error) {
         console.error('Manual status check error:', error);
@@ -475,6 +516,16 @@ app.post('/approver-response', async (req, res) => {
         const { workflowId, approverId, decision, reason } = req.body;
         
         console.log(`Approver response: ${workflowId}, Approver ${approverId}, Decision: ${decision}`);
+
+        // Check if workflow exists before updating approver action
+        const workflow = await db.getWorkflowById(workflowId);
+        if (!workflow) {
+            console.error(`Workflow ${workflowId} not found in database. Cannot insert approver action.`);
+            return res.status(404).json({
+                success: false,
+                error: 'Workflow not found'
+            });
+        }
 
         // Update approver action in database
         await db.insertApproverAction(workflowId, approverId, decision, reason);
