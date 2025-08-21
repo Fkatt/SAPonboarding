@@ -86,7 +86,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads'), {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Newman integration functions
-async function createDynamicEnvironment(formData, workflowId) {
+async function createDynamicEnvironment(formData, workflowId, baseUrl) {
     try {
         const baseEnvPath = path.join(__dirname, 'collections', 'environment.json');
         const baseEnv = await fs.readJson(baseEnvPath);
@@ -113,7 +113,7 @@ async function createDynamicEnvironment(formData, workflowId) {
             formData.uploadedFiles.forEach((file, index) => {
                 dynamicEnv.values.push({
                     key: `compliance_document_url_${index + 1}`,
-                    value: `${req.protocol}://${req.get('host')}${file.publicUrl}`
+                    value: `${baseUrl}${file.publicUrl}`
                 });
             });
         }
@@ -269,10 +269,11 @@ app.post('/submit-application', async (req, res) => {
 
         // Create dynamic environment and run Newman workflow
         try {
-            req.protocol = req.protocol || 'https';
-            req.get = req.get || (() => process.env.RENDER_EXTERNAL_URL?.replace('https://', '') || 'localhost:10000');
+            const protocol = req.protocol || 'https';
+            const host = req.get('host') || process.env.RENDER_EXTERNAL_URL?.replace('https://', '') || 'localhost:10000';
+            const baseUrl = `${protocol}://${host}`;
             
-            const envPath = await createDynamicEnvironment(formData, workflowId);
+            const envPath = await createDynamicEnvironment(formData, workflowId, baseUrl);
             const collectionPath = path.join(__dirname, 'collections', 'orkes-collection.json');
             
             // Run Newman workflow sequence
