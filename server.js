@@ -553,7 +553,7 @@ app.post('/approver-response', async (req, res) => {
     try {
         const { workflowId, approverId, decision, reason } = req.body;
         
-        console.log(`Approver response: ${workflowId}, Approver ${approverId}, Decision: ${decision}`);
+        console.log(`Approver response: ${workflowId}, Approver ${approverId}, Decision: ${decision}, Reason: "${reason || 'No reason provided'}"`);
 
         // Check if workflow exists before updating approver action
         console.log(`Looking for workflow with ID: ${workflowId}`);
