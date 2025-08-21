@@ -153,10 +153,47 @@ async function runNewmanCollection(collectionPath, environmentPath, folder) {
                 reject(err);
             } else {
                 console.log(`Newman completed for folder(s) "${folder}"`);
-                resolve(summary);
+                
+                // Extract environment variables from Newman execution
+                // This captures any variables set during the run (like JWT token)
+                const updatedEnvironment = summary.environment;
+                resolve({ summary, environment: updatedEnvironment });
             }
         });
     });
+}
+
+async function updateDynamicEnvironment(workflowId, newmanEnvironment) {
+    try {
+        if (newmanEnvironment && newmanEnvironment.values) {
+            const dynamicEnvPath = path.join(__dirname, 'collections', `dynamic-env-${workflowId}.json`);
+            
+            // Read current environment
+            const currentEnv = await fs.readJson(dynamicEnvPath);
+            
+            // Update with values from Newman (like JWT token)
+            const updatedValues = [...currentEnv.values];
+            
+            newmanEnvironment.values.forEach(newVar => {
+                const existingIndex = updatedValues.findIndex(v => v.key === newVar.key);
+                if (existingIndex >= 0) {
+                    // Update existing variable
+                    updatedValues[existingIndex] = newVar;
+                } else {
+                    // Add new variable
+                    updatedValues.push(newVar);
+                }
+            });
+            
+            currentEnv.values = updatedValues;
+            
+            // Save updated environment
+            await fs.writeJson(dynamicEnvPath, currentEnv, { spaces: 2 });
+            console.log(`Updated dynamic environment with Newman results: ${workflowId}`);
+        }
+    } catch (error) {
+        console.error('Error updating dynamic environment:', error);
+    }
 }
 
 async function cleanupDynamicEnvironment(workflowId) {
@@ -290,8 +327,14 @@ app.post('/submit-application', async (req, res) => {
             console.log('Starting Newman workflow sequence...');
             
             // Run initial workflow setup (Steps 1, 2, 3) together to preserve JWT token
-            await runNewmanCollection(collectionPath, envPath, ['1. Get JWT Token', '2. Start Onboarding Workflow', '3. Get Running Task IDs']);
+            const result = await runNewmanCollection(collectionPath, envPath, ['1. Get JWT Token', '2. Start Onboarding Workflow', '3. Get Running Task IDs']);
             console.log('Initial workflow sequence completed');
+            
+            // Save the JWT token and other variables back to the dynamic environment file
+            // This ensures the token is available for later approver responses
+            if (result.environment) {
+                await updateDynamicEnvironment(workflowId, result.environment);
+            }
             
             await db.insertTransaction({
                 workflow_id: workflowId,
@@ -379,8 +422,9 @@ app.post('/approver-response', async (req, res) => {
                 
                 await fs.writeJson(envPath, env, { spaces: 2 });
                 
-                // Trust the collection-level auth that works in Postman
-                await runNewmanCollection(collectionPath, envPath, '4a. Submit Single Approver Response');
+                // Always get fresh JWT token for approver responses (tokens expire!)
+                // Then submit the approver response with the fresh token
+                await runNewmanCollection(collectionPath, envPath, ['1. Get JWT Token', '4a. Submit Single Approver Response']);
                 console.log(`Approver ${approverId} response submitted to Orkes`);
             }
         } catch (newmanError) {
