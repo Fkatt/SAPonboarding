@@ -150,34 +150,6 @@
 			"type": "any",
 			"enabled": true
 		},
-		{
-			"key": "",
-			"value": "[object Object]",
-			"type": "text",
-			"enabled": true
-		},
-		{
-			"key": "item",
-			"value": "[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]",
-			"type": "text",
-			"enabled": true
-		},
-		{
-			"key": "auth",
-			"value": "[object Object]",
-			"type": "text",
-			"enabled": true
-		},
-		{
-			"key": "",
-			"value": "",
-			"type": "default",
-			"description": {
-				"content": "",
-				"type": "text/plain"
-			},
-			"enabled": true
-		}
 	],
 	"_postman_variable_scope": "environment",
 	"_postman_exported_at": "2025-08-21T09:26:54.449Z",

@@ -181,15 +181,23 @@ async function updateDynamicEnvironment(workflowId, newmanEnvironment) {
         console.log('newmanEnvironment.values is Array:', Array.isArray(newmanEnvironment?.values));
         
         if (newmanEnvironment && newmanEnvironment.values) {
-            // Handle both array and object cases for Newman environment values
+            // Newman environment should have values array, but sometimes it's wrapped differently
             let valuesArray = [];
+            
+            console.log('Newman environment values structure:', JSON.stringify(newmanEnvironment.values, null, 2).substring(0, 500));
+            
             if (Array.isArray(newmanEnvironment.values)) {
                 valuesArray = newmanEnvironment.values;
-                console.log('Newman environment values is an array');
-            } else if (typeof newmanEnvironment.values === 'object') {
-                // Convert object values to array format
-                valuesArray = Object.entries(newmanEnvironment.values).map(([key, value]) => ({ key, value }));
-                console.log('Newman environment values is an object, converted to array');
+                console.log('Newman environment values is an array with', valuesArray.length, 'items');
+            } else {
+                console.log('Newman environment values is not an array, trying to access as object property');
+                // Try to access the actual array from the Newman object structure
+                if (newmanEnvironment.values && newmanEnvironment.values.members && Array.isArray(newmanEnvironment.values.members)) {
+                    valuesArray = newmanEnvironment.values.members;
+                    console.log('Found Newman values in members array with', valuesArray.length, 'items');
+                } else {
+                    console.log('Could not find valid environment values array');
+                }
             }
             
             if (valuesArray.length > 0) {
@@ -204,19 +212,27 @@ async function updateDynamicEnvironment(workflowId, newmanEnvironment) {
                 console.log(`Processing ${valuesArray.length} environment variables from Newman`);
                 
                 valuesArray.forEach(newVar => {
-                if (newVar.key && newVar.value) {
-                    const existingIndex = updatedValues.findIndex(v => v.key === newVar.key);
-                    if (existingIndex >= 0) {
-                        // Update existing variable
-                        updatedValues[existingIndex] = newVar;
-                        console.log(`Updated variable: ${newVar.key} = ${newVar.value}`);
-                    } else {
-                        // Add new variable
-                        updatedValues.push(newVar);
-                        console.log(`Added new variable: ${newVar.key} = ${newVar.value}`);
+                    if (newVar.key && newVar.value !== undefined) {
+                        // Ensure we only copy the essential properties, not nested objects
+                        const cleanVar = {
+                            key: newVar.key,
+                            value: typeof newVar.value === 'object' ? JSON.stringify(newVar.value) : String(newVar.value),
+                            type: newVar.type || 'any',
+                            enabled: newVar.enabled !== false
+                        };
+                        
+                        const existingIndex = updatedValues.findIndex(v => v.key === newVar.key);
+                        if (existingIndex >= 0) {
+                            // Update existing variable
+                            updatedValues[existingIndex] = cleanVar;
+                            console.log(`Updated variable: ${cleanVar.key} = ${cleanVar.value}`);
+                        } else {
+                            // Add new variable
+                            updatedValues.push(cleanVar);
+                            console.log(`Added new variable: ${cleanVar.key} = ${cleanVar.value}`);
+                        }
                     }
-                }
-            });
+                });
                 
                 currentEnv.values = updatedValues;
                 
