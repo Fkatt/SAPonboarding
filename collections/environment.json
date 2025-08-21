@@ -1,21 +1,185 @@
 {
-  "name": "Orkes Environment - PLACEHOLDER",
-  "values": [
-    {
-      "key": "REPLACE_WITH_YOUR_ENVIRONMENT",
-      "value": "Export your Postman environment and replace this file"
-    },
-    {
-      "key": "orkes_server_url",
-      "value": "YOUR_ORKES_SERVER_URL"
-    },
-    {
-      "key": "orkes_key_id",
-      "value": "YOUR_ORKES_KEY_ID"
-    },
-    {
-      "key": "orkes_key_secret",
-      "value": "YOUR_ORKES_KEY_SECRET"
-    }
-  ]
+	"id": "47c058a3-54d3-42b1-88df-3b420fa1ede2",
+	"name": "Orkes Conductor API Environment",
+	"values": [
+		{
+			"key": "baseURL",
+			"value": "https://developer.orkescloud.com",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "KEY",
+			"value": "16qp64eb38d9-7e71-11f0-b60b-c227118a1889",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "SECRET",
+			"value": "vvLG0hYcNx89ev6xKZRzXjfvR8E7reWJUl5bSCBvZuq2XvEP",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "orkes_jwt",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "workflowId",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "contact_email",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "business_name",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "business_contact_number",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "address",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "business_license_id",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "compliance_document_url_1",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "compliance_document_url_2",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "approver1_email",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "approver2_email",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "approver3_email",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "approver1_taskId",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "approver2_taskId",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "approver3_taskId",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "",
+			"value": "[object Object]",
+			"type": "text",
+			"enabled": true
+		},
+		{
+			"key": "item",
+			"value": "[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]",
+			"type": "text",
+			"enabled": true
+		},
+		{
+			"key": "auth",
+			"value": "[object Object]",
+			"type": "text",
+			"enabled": true
+		},
+		{
+			"key": "",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-08-21T09:26:54.449Z",
+	"_postman_exported_using": "Postman/11.59.3"
 }
