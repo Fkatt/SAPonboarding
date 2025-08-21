@@ -180,18 +180,30 @@ async function updateDynamicEnvironment(workflowId, newmanEnvironment) {
         console.log('newmanEnvironment.values type:', typeof newmanEnvironment?.values);
         console.log('newmanEnvironment.values is Array:', Array.isArray(newmanEnvironment?.values));
         
-        if (newmanEnvironment && newmanEnvironment.values && Array.isArray(newmanEnvironment.values)) {
-            const dynamicEnvPath = path.join(__dirname, 'collections', `dynamic-env-${workflowId}.json`);
+        if (newmanEnvironment && newmanEnvironment.values) {
+            // Handle both array and object cases for Newman environment values
+            let valuesArray = [];
+            if (Array.isArray(newmanEnvironment.values)) {
+                valuesArray = newmanEnvironment.values;
+                console.log('Newman environment values is an array');
+            } else if (typeof newmanEnvironment.values === 'object') {
+                // Convert object values to array format
+                valuesArray = Object.entries(newmanEnvironment.values).map(([key, value]) => ({ key, value }));
+                console.log('Newman environment values is an object, converted to array');
+            }
             
-            // Read current environment
-            const currentEnv = await fs.readJson(dynamicEnvPath);
-            
-            // Update with values from Newman (like JWT token and task IDs)
-            const updatedValues = [...currentEnv.values];
-            
-            console.log(`Processing ${newmanEnvironment.values.length} environment variables from Newman`);
-            
-            newmanEnvironment.values.forEach(newVar => {
+            if (valuesArray.length > 0) {
+                const dynamicEnvPath = path.join(__dirname, 'collections', `dynamic-env-${workflowId}.json`);
+                
+                // Read current environment
+                const currentEnv = await fs.readJson(dynamicEnvPath);
+                
+                // Update with values from Newman (like JWT token and task IDs)
+                const updatedValues = [...currentEnv.values];
+                
+                console.log(`Processing ${valuesArray.length} environment variables from Newman`);
+                
+                valuesArray.forEach(newVar => {
                 if (newVar.key && newVar.value) {
                     const existingIndex = updatedValues.findIndex(v => v.key === newVar.key);
                     if (existingIndex >= 0) {
@@ -205,12 +217,15 @@ async function updateDynamicEnvironment(workflowId, newmanEnvironment) {
                     }
                 }
             });
-            
-            currentEnv.values = updatedValues;
-            
-            // Save updated environment
-            await fs.writeJson(dynamicEnvPath, currentEnv, { spaces: 2 });
-            console.log(`Successfully updated dynamic environment with Newman results: ${workflowId}`);
+                
+                currentEnv.values = updatedValues;
+                
+                // Save updated environment
+                await fs.writeJson(dynamicEnvPath, currentEnv, { spaces: 2 });
+                console.log(`Successfully updated dynamic environment with Newman results: ${workflowId}`);
+            } else {
+                console.log('No valid environment variables to process');
+            }
         } else {
             console.log('Newman environment has no values to process');
         }
