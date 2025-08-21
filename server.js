@@ -103,6 +103,52 @@ app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads'), {
     }
 }));
 
+// API routes (must come before static file serving)
+// Debug: Log all API requests
+app.use('/api/notifications/*', (req, res, next) => {
+    console.log(`🚀 API Request: ${req.method} ${req.originalUrl}`);
+    console.log(`🚀 Params:`, req.params);
+    next();
+});
+
+// Notification API endpoints
+app.get('/api/notifications/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        console.log(`📧 Fetching notifications for email: ${email}`);
+        const notifications = await db.getNotificationsByEmail(email);
+        console.log(`📧 Found ${notifications.length} notifications for ${email}`);
+        res.json(notifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.get('/api/notifications/:email/unread-count', async (req, res) => {
+    try {
+        const { email } = req.params;
+        console.log(`🔔 Fetching unread count for email: ${email}`);
+        const count = await db.getUnreadNotificationCount(email);
+        console.log(`🔔 Unread count for ${email}: ${count}`);
+        res.json({ count });
+    } catch (error) {
+        console.error('Error fetching unread count:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/api/notifications/:id/mark-read', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await db.markNotificationAsRead(id);
+        res.json({ success: result.changes > 0, changes: result.changes });
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Newman integration functions
@@ -1070,51 +1116,6 @@ app.use((req, res) => {
         success: false,
         error: 'Endpoint not found'
     });
-});
-
-// Debug: Log all API requests
-app.use('/api/notifications/*', (req, res, next) => {
-    console.log(`🚀 API Request: ${req.method} ${req.originalUrl}`);
-    console.log(`🚀 Params:`, req.params);
-    next();
-});
-
-// Notification API endpoints
-app.get('/api/notifications/:email', async (req, res) => {
-    try {
-        const { email } = req.params;
-        console.log(`📧 Fetching notifications for email: ${email}`);
-        const notifications = await db.getNotificationsByEmail(email);
-        console.log(`📧 Found ${notifications.length} notifications for ${email}`);
-        res.json(notifications);
-    } catch (error) {
-        console.error('Error fetching notifications:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-app.get('/api/notifications/:email/unread-count', async (req, res) => {
-    try {
-        const { email } = req.params;
-        console.log(`🔔 Fetching unread count for email: ${email}`);
-        const count = await db.getUnreadNotificationCount(email);
-        console.log(`🔔 Unread count for ${email}: ${count}`);
-        res.json({ count });
-    } catch (error) {
-        console.error('Error fetching unread count:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-app.post('/api/notifications/:id/mark-read', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const result = await db.markNotificationAsRead(id);
-        res.json({ success: result.changes > 0, changes: result.changes });
-    } catch (error) {
-        console.error('Error marking notification as read:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
 });
 
 // Start server
