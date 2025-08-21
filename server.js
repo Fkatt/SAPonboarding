@@ -377,6 +377,18 @@ app.get('/debug/workflows', async (req, res) => {
     }
 });
 
+// Test webhook endpoint  
+app.post('/test-webhook', (req, res) => {
+    console.log('🧪 TEST WEBHOOK RECEIVED!');
+    console.log('Headers:', req.headers);
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    res.json({ 
+        success: true, 
+        message: 'Test webhook received successfully!',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Health check endpoint
 app.get('/health', async (req, res) => {
     try {
@@ -802,8 +814,11 @@ app.post('/completion', async (req, res) => {
 // Orkes webhook endpoints
 app.post('/approval', async (req, res) => {
     try {
-        console.log('🎉 APPROVAL WEBHOOK RECEIVED!');
-        console.log('Full webhook payload:', JSON.stringify(req.body, null, 2));
+        console.log('\n=== APPROVAL WEBHOOK RECEIVED ===');
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('Headers:', JSON.stringify(req.headers, null, 2));
+        console.log('Body:', JSON.stringify(req.body, null, 2));
+        console.log('================================\n');
         
         // Try multiple ways to identify the workflow
         let workflow = null;
@@ -884,7 +899,11 @@ app.post('/approval', async (req, res) => {
 
 app.post('/rejection', async (req, res) => {
     try {
-        console.log('Received rejection webhook:', JSON.stringify(req.body, null, 2));
+        console.log('\n=== REJECTION WEBHOOK RECEIVED ===');
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('Headers:', JSON.stringify(req.headers, null, 2));
+        console.log('Body:', JSON.stringify(req.body, null, 2));
+        console.log('=================================\n');
         
         // Extract applicant email from Orkes webhook payload  
         const applicantEmail = req.body.email || req.body.complete_submission?.applicant_email;

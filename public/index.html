@@ -966,10 +966,10 @@
             let reason = '';
             if (decision === 'REJECTED') {
                 reason = prompt(`Please provide a reason for rejecting this application:`) || '';
-                if (reason === null) return; // User cancelled
-            } else {
-                reason = prompt(`Optional: Add a comment for approving this application:`) || '';
-                if (reason === null) return; // User cancelled  
+                if (!reason || reason.trim() === '') {
+                    showNotification('Rejection reason is required', 'error');
+                    return;
+                }
             }
 
             try {
