@@ -184,7 +184,7 @@ async function updateDynamicEnvironment(workflowId, newmanEnvironment) {
             // Update with values from Newman (like JWT token and task IDs)
             const updatedValues = [...currentEnv.values];
             
-            console.log(`Processing ${newmanEnvironment.values ? newmanEnvironment.values.length : 0} environment variables from Newman`);
+            console.log(`Processing ${newmanEnvironment.values.length} environment variables from Newman`);
             
             newmanEnvironment.values.forEach(newVar => {
                 if (newVar.key && newVar.value) {
