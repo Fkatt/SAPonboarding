@@ -1338,11 +1338,231 @@
             background: linear-gradient(135deg, #c0392b, #a93226);
         }
 
+        /* Help Icon Styles */
+        .help-icon {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            cursor: pointer;
+        }
+
+        .help-icon-inner {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            animation: helpIconFloat 3s ease-in-out infinite;
+        }
+
+        .help-icon:hover .help-icon-inner {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .help-icon-text {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .help-icon-pulse {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid rgba(102, 126, 234, 0.6);
+            border-radius: 50%;
+            animation: helpIconPulse 2s ease-out infinite;
+        }
+
+        @keyframes helpIconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes helpIconPulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        /* Technical Documentation Modal */
+        .tech-doc-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 95%;
+            max-width: 1000px;
+            max-height: 90vh;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 1002;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            overflow: hidden;
+        }
+
+        .tech-doc-modal.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .tech-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 24px;
+        }
+
+        .tech-content {
+            padding: 0;
+            overflow-y: auto;
+            max-height: calc(90vh - 100px);
+        }
+
+        .doc-section {
+            padding: 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .doc-section:last-child {
+            border-bottom: none;
+        }
+
+        .doc-section h3 {
+            color: #2c3e50;
+            margin: 0 0 16px 0;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .doc-section h4 {
+            color: #34495e;
+            margin: 16px 0 8px 0;
+            font-size: 16px;
+        }
+
+        .doc-section p {
+            color: #5a6c7d;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .api-endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .api-method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .api-method.get { background: #d4edda; color: #155724; }
+        .api-method.post { background: #cce5ff; color: #004085; }
+        .api-method.put { background: #fff3cd; color: #856404; }
+
+        .json-code {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 12px 0;
+            white-space: pre-wrap;
+        }
+
+        .workflow-step {
+            background: #f7fafc;
+            border-left: 4px solid #4299e1;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .workflow-step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: #4299e1;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .tech-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .tech-badge {
+            background: #e2e8f0;
+            color: #2d3748;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tech-badge.nodejs { background: #48bb78; color: white; }
+        .tech-badge.newman { background: #ff6b35; color: white; }
+        .tech-badge.orkes { background: #805ad5; color: white; }
+        .tech-badge.express { background: #2d3748; color: white; }
+
         /* Mobile responsive for modal */
         @media (max-width: 768px) {
-            .application-modal, .approver-modal {
+            .application-modal, .approver-modal, .tech-doc-modal {
                 width: 95%;
                 margin: 10px;
+            }
+
+            .help-icon {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .help-icon-inner {
+                width: 50px;
+                height: 50px;
+            }
+
+            .help-icon-text {
+                font-size: 20px;
             }
 
             .application-details {
@@ -1410,6 +1630,12 @@
 
         <!-- Submit Application Tab -->
         <div id="submit-tab" class="tab-content active">
+            <div class="help-icon" onclick="showTechnicalDoc('submit')" title="Technical Documentation">
+                <div class="help-icon-inner">
+                    <span class="help-icon-text">?</span>
+                    <div class="help-icon-pulse"></div>
+                </div>
+            </div>
             <h2>Vendor Application Form</h2>
             
             <form id="application-form">
@@ -1467,6 +1693,12 @@
 
         <!-- Approvers Tab -->
         <div id="approvers-tab" class="tab-content">
+            <div class="help-icon" onclick="showTechnicalDoc('approvers')" title="Technical Documentation">
+                <div class="help-icon-inner">
+                    <span class="help-icon-text">?</span>
+                    <div class="help-icon-pulse"></div>
+                </div>
+            </div>
             <h2>Department Approver Dashboard</h2>
             <p class="dashboard-subtitle">Review and approve vendor applications for your department</p>
             
@@ -1536,8 +1768,26 @@
             </div>
         </div>
 
+        <!-- Technical Documentation Modal -->
+        <div class="modal-overlay" id="tech-doc-overlay" onclick="closeTechnicalDoc()"></div>
+        <div class="tech-doc-modal" id="tech-doc-modal">
+            <div class="modal-header tech-header">
+                <h2 id="tech-doc-title">🔧 Technical Documentation</h2>
+                <button class="modal-close" onclick="closeTechnicalDoc()">×</button>
+            </div>
+            <div class="modal-content tech-content" id="tech-doc-content">
+                <!-- Technical documentation will be populated here -->
+            </div>
+        </div>
+
         <!-- Applications Tab -->
         <div id="applications-tab" class="tab-content">
+            <div class="help-icon" onclick="showTechnicalDoc('applications')" title="Technical Documentation">
+                <div class="help-icon-inner">
+                    <span class="help-icon-text">?</span>
+                    <div class="help-icon-pulse"></div>
+                </div>
+            </div>
             <h2>All Applications</h2>
             
             <div class="stats-grid">
@@ -1582,6 +1832,12 @@
 
         <!-- Transactions Tab -->
         <div id="transactions-tab" class="tab-content">
+            <div class="help-icon" onclick="showTechnicalDoc('transactions')" title="Technical Documentation">
+                <div class="help-icon-inner">
+                    <span class="help-icon-text">?</span>
+                    <div class="help-icon-pulse"></div>
+                </div>
+            </div>
             <h2>Transaction History</h2>
             
             <table class="table">
@@ -2685,6 +2941,502 @@
 
         // Refresh approver counts periodically
         setInterval(loadApproverCounts, 15000); // Every 15 seconds
+
+        // Technical Documentation System
+        function showTechnicalDoc(section) {
+            const modal = document.getElementById('tech-doc-modal');
+            const overlay = document.getElementById('tech-doc-overlay');
+            const content = document.getElementById('tech-doc-content');
+            const title = document.getElementById('tech-doc-title');
+            
+            const docData = getTechnicalDocumentation(section);
+            title.textContent = docData.title;
+            content.innerHTML = docData.content;
+            
+            modal.classList.add('open');
+            overlay.classList.add('open');
+        }
+
+        function closeTechnicalDoc() {
+            const modal = document.getElementById('tech-doc-modal');
+            const overlay = document.getElementById('tech-doc-overlay');
+            
+            modal.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        function getTechnicalDocumentation(section) {
+            const docs = {
+                submit: {
+                    title: '🚀 Submit Application - Technical Documentation',
+                    content: `
+                        <div class="doc-section">
+                            <h3>📋 Overview</h3>
+                            <p>The Submit Application section handles vendor onboarding form submissions and initiates the automated approval workflow using Orkes Conductor.</p>
+                            
+                            <div class="tech-badges">
+                                <span class="tech-badge nodejs">Node.js</span>
+                                <span class="tech-badge express">Express</span>
+                                <span class="tech-badge newman">Newman</span>
+                                <span class="tech-badge orkes">Orkes</span>
+                            </div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>🔄 Workflow Process</h3>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">1</span>
+                                <strong>Form Submission:</strong> User fills out vendor application form with business details and uploads documents
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">2</span>
+                                <strong>File Upload:</strong> Documents uploaded to /uploads directory with unique IDs and public URLs generated
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">3</span>
+                                <strong>Database Storage:</strong> Application stored in workflows.json with RUNNING status and unique workflow ID
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">4</span>
+                                <strong>Dynamic Environment:</strong> Newman environment file created with application data and workflow variables
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">5</span>
+                                <strong>Orkes Trigger:</strong> Newman executes Postman collection to start Orkes Conductor workflow
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">6</span>
+                                <strong>Notification:</strong> System creates submission notification for applicant
+                            </div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>🔗 API Endpoints</h3>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /submit-application
+                                <p>Handles form submission and initiates workflow</p>
+                            </div>
+                            
+                            <h4>Request Payload:</h4>
+                            <div class="json-code">{
+  "formData": {
+    "applicant_email": "vendor@company.com",
+    "business_name": "ABC Corp",
+    "business_license_id": "BL123456",
+    "business_contact_number": "+1234567890",
+    "address": "123 Business St, City, State 12345",
+    "uploadedFiles": [
+      {
+        "fileId": "file_123",
+        "originalName": "license.pdf",
+        "publicUrl": "/uploads/file_123.pdf",
+        "size": 1024000,
+        "type": "application/pdf"
+      }
+    ]
+  }
+}</div>
+
+                            <h4>Response:</h4>
+                            <div class="json-code">{
+  "success": true,
+  "workflowId": "wf_a1b2c3d4",
+  "message": "Application submitted successfully"
+}</div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>⚙️ Newman & Orkes Integration</h3>
+                            <p><strong>Dynamic Environment Creation:</strong></p>
+                            <p>System creates a dynamic environment file for each workflow:</p>
+                            
+                            <div class="json-code">{
+  "name": "Dynamic Environment wf_a1b2c3d4",
+  "values": [
+    {
+      "key": "workflow_id",
+      "value": "wf_a1b2c3d4"
+    },
+    {
+      "key": "business_name", 
+      "value": "ABC Corp"
+    },
+    {
+      "key": "applicant_email",
+      "value": "vendor@company.com"
+    },
+    {
+      "key": "orkes_server_url",
+      "value": "https://play.orkes.io"
+    }
+  ]
+}</div>
+
+                            <p><strong>Newman Execution:</strong></p>
+                            <div class="json-code">newman run collections/orkes-collection.json \\
+  --environment collections/dynamic-env-wf_a1b2c3d4.json \\
+  --reporters cli,json \\
+  --reporter-json-export results.json</div>
+                        </div>
+                    `
+                },
+                
+                approvers: {
+                    title: '👥 Approver Dashboard - Technical Documentation', 
+                    content: `
+                        <div class="doc-section">
+                            <h3>📋 Overview</h3>
+                            <p>The Approver Dashboard provides department-specific interfaces for Finance, Legal, and Procurement teams to review and approve/reject vendor applications.</p>
+                            
+                            <div class="tech-badges">
+                                <span class="tech-badge nodejs">Node.js</span>
+                                <span class="tech-badge express">Express</span>
+                                <span class="tech-badge newman">Newman</span>
+                                <span class="tech-badge orkes">Orkes</span>
+                            </div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>🏢 Department Structure</h3>
+                            <p><strong>Finance Department (ID: 1)</strong> - 💰 finance.approver@sapco.com</p>
+                            <p><strong>Legal Department (ID: 2)</strong> - ⚖️ legal.approver@sapco.com</p>
+                            <p><strong>Procurement Department (ID: 3)</strong> - 📦 procurement.approver@sapco.com</p>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>🔄 Approval Workflow</h3>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">1</span>
+                                <strong>Load Pending:</strong> Each department card shows real-time count of pending applications
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">2</span>
+                                <strong>Review Modal:</strong> Click "Review Applications" to open modal with pending applications
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">3</span>
+                                <strong>Decision:</strong> Approve (instant) or Reject (requires reason)
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">4</span>
+                                <strong>Newman Execution:</strong> Decision triggers Newman to update Orkes workflow
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">5</span>
+                                <strong>Notification:</strong> System creates approval/rejection notification for applicant
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">6</span>
+                                <strong>Auto-Remove:</strong> Application disappears from approver's queue after decision
+                            </div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>🔗 API Endpoints</h3>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method get">GET</span> /approver-queue/{approverId}
+                                <p>Gets pending applications for specific approver</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /approver-response
+                                <p>Submits approval/rejection decision</p>
+                            </div>
+
+                            <h4>Approver Response Payload:</h4>
+                            <div class="json-code">{
+  "workflowId": "wf_a1b2c3d4",
+  "approverId": "1",
+  "decision": "APPROVED", // or "REJECTED"
+  "reason": "All financial requirements met" // Required for rejection
+}</div>
+
+                            <h4>Queue Response:</h4>
+                            <div class="json-code">{
+  "success": true,
+  "applications": [
+    {
+      "workflowId": "wf_a1b2c3d4",
+      "business_name": "ABC Corp",
+      "applicant_email": "vendor@company.com", 
+      "createdAt": "2024-01-15T10:30:00Z",
+      "form_data": {
+        "business_license_id": "BL123456",
+        "business_contact_number": "+1234567890",
+        "address": "123 Business St"
+      }
+    }
+  ]
+}</div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>⚙️ Orkes Integration</h3>
+                            <p><strong>Task Completion:</strong> When approver makes decision, Newman executes collection to complete the assigned task in Orkes:</p>
+                            
+                            <div class="json-code">{
+  "target_approver": "1",
+  "approver_decision": "APPROVED",
+  "rejection_reason": "",
+  "workflow_id": "wf_a1b2c3d4"
+}</div>
+
+                            <p>This updates the Orkes workflow state and triggers the next step in the approval process.</p>
+                        </div>
+                    `
+                },
+                
+                applications: {
+                    title: '📊 Applications Overview - Technical Documentation',
+                    content: `
+                        <div class="doc-section">
+                            <h3>📋 Overview</h3>
+                            <p>The Applications tab provides a comprehensive view of all vendor applications with real-time statistics, detailed application information, and approval timeline tracking.</p>
+                            
+                            <div class="tech-badges">
+                                <span class="tech-badge nodejs">Node.js</span>
+                                <span class="tech-badge express">Express</span>
+                                <span class="tech-badge">JSON Storage</span>
+                            </div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>📈 Statistics Dashboard</h3>
+                            <p><strong>Real-time Metrics:</strong></p>
+                            <ul>
+                                <li>Total Applications - All submitted applications</li>
+                                <li>Approved - Successfully approved applications</li>
+                                <li>Pending - Applications awaiting approval</li>
+                                <li>Rejected - Applications that were rejected</li>
+                            </ul>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>🔍 Application Details Modal</h3>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">1</span>
+                                <strong>Click Row:</strong> Click any application row to open detailed modal
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">2</span>
+                                <strong>Business Info:</strong> Complete business details, license, contact information
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">3</span>
+                                <strong>Approval Timeline:</strong> Real-time status from each department with timestamps
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">4</span>
+                                <strong>Documents:</strong> Access to all uploaded documents with direct download links
+                            </div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>🔗 API Endpoints</h3>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method get">GET</span> /applications
+                                <p>Retrieves all applications with file information and statistics</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method get">GET</span> /transactions
+                                <p>Gets transaction history for timeline building</p>
+                            </div>
+
+                            <h4>Applications Response:</h4>
+                            <div class="json-code">{
+  "success": true,
+  "applications": [
+    {
+      "id": 1,
+      "workflow_id": "wf_a1b2c3d4",
+      "business_name": "ABC Corp",
+      "applicant_email": "vendor@company.com",
+      "status": "RUNNING",
+      "created_at": "2024-01-15T10:30:00Z",
+      "form_data": {
+        "business_license_id": "BL123456",
+        "business_contact_number": "+1234567890", 
+        "address": "123 Business St, City, State"
+      },
+      "file_count": 2,
+      "file_urls": [
+        "/uploads/license_123.pdf",
+        "/uploads/certificate_456.pdf"
+      ],
+      "file_names": [
+        "business_license.pdf",
+        "tax_certificate.pdf"
+      ]
+    }
+  ]
+}</div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>📅 Timeline Construction</h3>
+                            <p><strong>Real-time Timeline:</strong> The approval timeline is built by analyzing transaction history:</p>
+                            
+                            <div class="json-code">// Timeline uses transaction data to show:
+{
+  "type": "APPROVER_RESPONSE", 
+  "details": "Approver 1 APPROVED: Financial requirements met",
+  "created_at": "2024-01-15T11:15:00Z"
+}
+
+// Displays as:
+// 💰 Finance Department
+// ✅ Approved - 1/15/2024 11:15 AM</div>
+                        </div>
+                    `
+                },
+                
+                transactions: {
+                    title: '📋 Transaction History - Technical Documentation',
+                    content: `
+                        <div class="doc-section">
+                            <h3>📋 Overview</h3>
+                            <p>The Transactions tab provides a comprehensive audit trail of all system activities including submissions, approver decisions, webhook events, and system errors.</p>
+                            
+                            <div class="tech-badges">
+                                <span class="tech-badge nodejs">Node.js</span>
+                                <span class="tech-badge express">Express</span>
+                                <span class="tech-badge">Audit Trail</span>
+                            </div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>📝 Transaction Types</h3>
+                            <ul>
+                                <li><strong>SUBMISSION:</strong> Application submitted by vendor</li>
+                                <li><strong>APPROVER_RESPONSE:</strong> Approval/rejection by department</li>
+                                <li><strong>WEBHOOK:</strong> Final approval from Orkes completion webhook</li>
+                                <li><strong>REJECTION:</strong> Application rejected with detailed reasons</li>
+                                <li><strong>ERROR:</strong> System errors during workflow execution</li>
+                                <li><strong>WORKFLOW:</strong> Newman workflow execution events</li>
+                            </ul>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>💼 Enhanced Display Features</h3>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">1</span>
+                                <strong>Department Cards:</strong> Visual approver info with department avatars and emails
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">2</span>
+                                <strong>Decision Badges:</strong> Color-coded approval/rejection status indicators
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">3</span>
+                                <strong>Rejection Details:</strong> Structured rejection information with reasons
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">4</span>
+                                <strong>Smart Parsing:</strong> Automatic detection of JSON vs string transaction details
+                            </div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>🔗 API Endpoints</h3>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method get">GET</span> /transactions
+                                <p>Retrieves all system transactions with business context</p>
+                            </div>
+
+                            <h4>Transactions Response:</h4>
+                            <div class="json-code">{
+  "success": true,
+  "transactions": [
+    {
+      "id": 1,
+      "workflow_id": "wf_a1b2c3d4",
+      "type": "APPROVER_RESPONSE",
+      "status": "APPROVED", 
+      "details": "Approver 1 APPROVED: All requirements met",
+      "created_at": "2024-01-15T11:15:00Z",
+      "business_name": "ABC Corp",
+      "applicant_email": "vendor@company.com"
+    },
+    {
+      "id": 2,
+      "workflow_id": "wf_a1b2c3d4", 
+      "type": "REJECTION",
+      "status": "REJECTED",
+      "details": {
+        "rejecting_department": "Legal Department",
+        "rejection_reason": "Missing required compliance documentation",
+        "rejection_details": "Please provide ISO certification",
+        "business_name": "ABC Corp",
+        "timestamp": "2024-01-15T12:30:00Z"
+      },
+      "created_at": "2024-01-15T12:30:00Z"
+    }
+  ]
+}</div>
+                        </div>
+
+                        <div class="doc-section">
+                            <h3>🔄 Webhook Integration</h3>
+                            <p><strong>Orkes Completion Webhooks:</strong></p>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /approval
+                                <p>Handles final approval webhooks from Orkes</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /rejection  
+                                <p>Handles rejection webhooks with detailed reasons</p>
+                            </div>
+
+                            <h4>Rejection Webhook Payload:</h4>
+                            <div class="json-code">{
+  "workflowInstanceId": "orkes_workflow_123",
+  "taskType": "rejection_task", 
+  "outputData": {
+    "rejection_reason": "Missing compliance docs",
+    "rejecting_approver": "approver_2",
+    "business_name": "ABC Corp"
+  },
+  "complete_submission": {
+    "applicant_email": "vendor@company.com",
+    "workflow_id": "wf_a1b2c3d4"
+  }
+}</div>
+
+                            <p>Creates comprehensive transaction records with full context for audit purposes.</p>
+                        </div>
+                    `
+                }
+            };
+            
+            return docs[section] || { title: 'Documentation', content: '<p>Documentation not found.</p>' };
+        }
     </script>
 </body>
 </html>
