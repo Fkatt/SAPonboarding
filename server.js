@@ -928,13 +928,17 @@ app.listen(PORT, () => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
     console.log('SIGTERM received, shutting down gracefully');
-    db.close();
+    if (db && typeof db.close === 'function') {
+        db.close();
+    }
     process.exit(0);
 });
 
 process.on('SIGINT', () => {
     console.log('SIGINT received, shutting down gracefully');
-    db.close();
+    if (db && typeof db.close === 'function') {
+        db.close();
+    }
     process.exit(0);
 });
 

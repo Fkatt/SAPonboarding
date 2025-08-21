@@ -941,17 +941,17 @@
                     <div class="approver-card">
                         <h3>Application: ${app.business_name}</h3>
                         <p><strong>Applicant:</strong> ${app.applicant_email}</p>
-                        <p><strong>Workflow ID:</strong> ${app.workflow_id}</p>
+                        <p><strong>Workflow ID:</strong> ${app.workflowId}</p>
                         <p><strong>Business License:</strong> ${formData.business_license_id || 'Not provided'}</p>
                         <p><strong>Contact:</strong> ${formData.business_contact_number || 'Not provided'}</p>
                         <p><strong>Address:</strong> ${formData.address || 'Not provided'}</p>
                         ${fileLinks ? `<p><strong>Files:</strong> ${fileLinks}</p>` : ''}
                         
                         <div class="approver-actions">
-                            <button class="btn btn-success" onclick="submitApproverResponse('${app.workflow_id}', '${approverId}', 'APPROVED')">
+                            <button class="btn btn-success" onclick="submitApproverResponse('${app.workflowId}', '${approverId}', 'APPROVED')">
                                 Approve
                             </button>
-                            <button class="btn btn-danger" onclick="submitApproverResponse('${app.workflow_id}', '${approverId}', 'REJECTED')">
+                            <button class="btn btn-danger" onclick="submitApproverResponse('${app.workflowId}', '${approverId}', 'REJECTED')">
                                 Reject
                             </button>
                         </div>
@@ -1027,7 +1027,7 @@
 
                 html += `
                     <tr>
-                        <td>${app.workflow_id}</td>
+                        <td>${app.workflow_id || app.workflowId}</td>
                         <td>${app.business_name}</td>
                         <td>${app.applicant_email}</td>
                         <td><span class="status-badge status-${app.status.toLowerCase()}">${app.status}</span></td>
