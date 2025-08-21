@@ -49,9 +49,14 @@ app.use((req, res, next) => {
     if (req.method === 'POST' && (req.url.includes('webhook') || req.url.includes('approval') || req.url.includes('rejection'))) {
         console.log(`=== INCOMING POST REQUEST ===`);
         console.log(`URL: ${req.url}`);
+        console.log(`User-Agent:`, req.headers['user-agent']);
+        console.log(`Content-Type:`, req.headers['content-type']);
         console.log(`Headers:`, JSON.stringify(req.headers, null, 2));
         console.log(`Body:`, JSON.stringify(req.body, null, 2));
         console.log(`=== END POST REQUEST ===`);
+    } else if (req.method === 'POST') {
+        // Log ALL POST requests to see if webhooks are hitting different endpoints
+        console.log(`POST request to: ${req.url} from ${req.headers['user-agent'] || 'Unknown'}`);
     }
     next();
 });
@@ -797,44 +802,76 @@ app.post('/completion', async (req, res) => {
 // Orkes webhook endpoints
 app.post('/approval', async (req, res) => {
     try {
-        console.log('Received approval webhook:', JSON.stringify(req.body, null, 2));
+        console.log('🎉 APPROVAL WEBHOOK RECEIVED!');
+        console.log('Full webhook payload:', JSON.stringify(req.body, null, 2));
         
-        // Extract applicant email from Orkes webhook payload
+        // Try multiple ways to identify the workflow
+        let workflow = null;
+        let identifiedBy = '';
+        
+        // Method 1: Try by applicant email
         const applicantEmail = req.body.email || req.body.complete_submission?.applicant_email;
-        const businessName = req.body.business_name || req.body.complete_submission?.application_data?.business_name;
-        
-        console.log(`Looking for workflow with applicant_email: ${applicantEmail} and business_name: ${businessName}`);
-        
         if (applicantEmail) {
-            // Find the workflow by applicant email
-            const workflow = await db.getWorkflowByApplicantEmail(applicantEmail);
-            
+            workflow = await db.getWorkflowByApplicantEmail(applicantEmail);
             if (workflow) {
-                console.log(`Found workflow: ${workflow.workflow_id} for approval`);
-                
-                await db.updateWorkflowStatus(workflow.workflow_id, 'APPROVED');
-                
-                await db.insertTransaction({
-                    workflow_id: workflow.workflow_id,
-                    type: 'WEBHOOK',
-                    status: 'APPROVED',
-                    details: 'Final approval received from Orkes webhook'
-                });
-                
-                // Cleanup dynamic environment
-                await cleanupDynamicEnvironment(workflow.workflow_id);
-                
-                console.log(`Workflow ${workflow.workflow_id} approved successfully`);
-            } else {
-                console.log(`No workflow found for applicant email: ${applicantEmail}`);
+                identifiedBy = `applicant email: ${applicantEmail}`;
             }
+        }
+        
+        // Method 2: Try by Orkes workflow ID (if we stored it)
+        if (!workflow && req.body.workflowInstanceId) {
+            workflow = await db.getWorkflowByOrkesId(req.body.workflowInstanceId);
+            if (workflow) {
+                identifiedBy = `Orkes workflow ID: ${req.body.workflowInstanceId}`;
+            }
+        }
+        
+        // Method 3: Try by business name + recent workflows
+        if (!workflow) {
+            const businessName = req.body.business_name || req.body.complete_submission?.application_data?.business_name;
+            if (businessName) {
+                const allWorkflows = await db.getWorkflows();
+                workflow = allWorkflows.find(w => 
+                    w.business_name === businessName && 
+                    w.status === 'RUNNING'
+                );
+                if (workflow) {
+                    identifiedBy = `business name: ${businessName}`;
+                }
+            }
+        }
+        
+        if (workflow) {
+            console.log(`✅ Found workflow ${workflow.workflow_id} by ${identifiedBy}`);
+            
+            await db.updateWorkflowStatus(workflow.workflow_id, 'APPROVED');
+            
+            await db.insertTransaction({
+                workflow_id: workflow.workflow_id,
+                type: 'WEBHOOK',
+                status: 'APPROVED',
+                details: `Final approval received from Orkes webhook (identified by ${identifiedBy})`
+            });
+            
+            // Cleanup dynamic environment
+            await cleanupDynamicEnvironment(workflow.workflow_id);
+            
+            console.log(`🎉 Workflow ${workflow.workflow_id} marked as APPROVED!`);
         } else {
-            console.log('No applicant email found in webhook payload');
+            console.log('❌ Could not identify workflow from webhook payload');
+            console.log('Available workflows:', (await db.getWorkflows()).map(w => ({
+                id: w.workflow_id,
+                business: w.business_name,
+                email: w.applicant_email,
+                status: w.status,
+                orkes_id: w.orkes_workflow_id
+            })));
         }
         
         res.json({
             success: true,
-            message: 'Approval webhook processed'
+            message: 'Approval webhook processed',
+            workflowFound: !!workflow
         });
     } catch (error) {
         console.error('Approval webhook error:', error);
