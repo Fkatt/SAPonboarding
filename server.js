@@ -131,18 +131,28 @@ async function createDynamicEnvironment(formData, workflowId, baseUrl) {
 
 async function runNewmanCollection(collectionPath, environmentPath, folder) {
     return new Promise((resolve, reject) => {
-        newman.run({
+        const options = {
             collection: collectionPath,
             environment: environmentPath,
-            folder: folder,
             reporters: 'cli',
             timeout: 120000 // 2 minutes timeout
-        }, (err, summary) => {
+        };
+        
+        // If folder is an array, run multiple folders in sequence
+        // If folder is a string, run single folder
+        if (Array.isArray(folder)) {
+            options.folder = folder;
+        } else if (folder) {
+            options.folder = folder;
+        }
+        // If no folder specified, run entire collection
+        
+        newman.run(options, (err, summary) => {
             if (err) {
-                console.error(`Newman error for folder "${folder}":`, err);
+                console.error(`Newman error for folder(s) "${folder}":`, err);
                 reject(err);
             } else {
-                console.log(`Newman completed for folder "${folder}"`);
+                console.log(`Newman completed for folder(s) "${folder}"`);
                 resolve(summary);
             }
         });
@@ -276,20 +286,12 @@ app.post('/submit-application', async (req, res) => {
             const envPath = await createDynamicEnvironment(formData, workflowId, baseUrl);
             const collectionPath = path.join(__dirname, 'collections', 'orkes-collection.json');
             
-            // Run Newman workflow sequence
+            // Run Newman workflow sequence - run all folders together to share environment
             console.log('Starting Newman workflow sequence...');
             
-            // 1. Get JWT Token
-            await runNewmanCollection(collectionPath, envPath, '1. Get JWT Token');
-            console.log('JWT Token obtained');
-            
-            // 2. Start Onboarding Workflow
-            await runNewmanCollection(collectionPath, envPath, '2. Start Onboarding Workflow');
-            console.log('Onboarding workflow started');
-            
-            // 3. Get Running Task IDs
-            await runNewmanCollection(collectionPath, envPath, '3. Get Running Task IDs');
-            console.log('Task IDs retrieved');
+            // Run initial workflow setup (Steps 1, 2, 3) together to preserve JWT token
+            await runNewmanCollection(collectionPath, envPath, ['1. Get JWT Token', '2. Start Onboarding Workflow', '3. Get Running Task IDs']);
+            console.log('Initial workflow sequence completed');
             
             await db.insertTransaction({
                 workflow_id: workflowId,
