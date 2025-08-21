@@ -666,19 +666,20 @@ app.get('/transactions', (req, res) => {
 });
 
 // Get approver queue
-app.get('/approver-queue/:id', (req, res) => {
+app.get('/approver-queue/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const applications = db.getPendingApplications(id);
+        const applications = await db.getPendingApplications(id);
         res.json({
             success: true,
-            applications
+            applications: applications || []
         });
     } catch (error) {
         console.error('Error getting approver queue:', error);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: error.message,
+            applications: []
         });
     }
 });
