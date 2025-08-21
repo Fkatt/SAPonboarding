@@ -101,9 +101,9 @@ async function createDynamicEnvironment(formData, workflowId, baseUrl) {
                 { key: 'business_contact_number', value: formData.business_contact_number || '' },
                 { key: 'address', value: formData.address || '' },
                 { key: 'business_license_id', value: formData.business_license_id || '' },
-                { key: 'approver1_email', value: formData.approver1_email || '' },
-                { key: 'approver2_email', value: formData.approver2_email || '' },
-                { key: 'approver3_email', value: formData.approver3_email || '' },
+                { key: 'approver1_email', value: 'finance@sapco.com' },
+                { key: 'approver2_email', value: 'legal@sapco.com' },
+                { key: 'approver3_email', value: 'procurement@sapco.com' },
                 { key: 'workflow_id', value: workflowId }
             ]
         };
@@ -361,11 +361,10 @@ app.post('/submit-application', async (req, res) => {
             details: `Application submitted by ${formData.applicant_email}`
         });
 
-        // Initialize approver actions
+        // Initialize approver actions - always create 3 approvers
+        const approverEmails = ['finance@sapco.com', 'legal@sapco.com', 'procurement@sapco.com'];
         for (let i = 1; i <= 3; i++) {
-            if (formData[`approver${i}_email`]) {
-                await db.insertApproverAction(workflowId, i.toString(), 'PENDING', null);
-            }
+            await db.insertApproverAction(workflowId, i.toString(), 'PENDING', null);
         }
 
         // Create dynamic environment and run Newman workflow
