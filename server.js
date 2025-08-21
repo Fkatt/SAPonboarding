@@ -264,6 +264,36 @@ async function cleanupDynamicEnvironment(workflowId) {
 
 // API Routes
 
+// Manual workflow status check endpoint
+app.post('/check-workflow-status', async (req, res) => {
+    try {
+        const { workflowId } = req.body;
+        console.log(`Manual status check for workflow: ${workflowId}`);
+        
+        // Get current workflow from database
+        const workflow = await db.getWorkflowById(workflowId);
+        if (!workflow) {
+            return res.status(404).json({ success: false, error: 'Workflow not found' });
+        }
+        
+        console.log(`Current status in DB: ${workflow.status}`);
+        
+        // If workflow is still RUNNING, we could poll Orkes here
+        // For now, just return current status
+        res.json({ 
+            success: true, 
+            workflow: workflow,
+            message: `Workflow ${workflowId} status: ${workflow.status}` 
+        });
+    } catch (error) {
+        console.error('Manual status check error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     try {
@@ -605,6 +635,27 @@ app.post('/add-transaction', (req, res) => {
         });
     } catch (error) {
         console.error('Error adding transaction:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Generic webhook endpoint for debugging
+app.post('/webhook', async (req, res) => {
+    try {
+        console.log('=== GENERIC WEBHOOK RECEIVED ===');
+        console.log('Headers:', req.headers);
+        console.log('Body:', JSON.stringify(req.body, null, 2));
+        console.log('=== END WEBHOOK DEBUG ===');
+        
+        res.json({
+            success: true,
+            message: 'Generic webhook received'
+        });
+    } catch (error) {
+        console.error('Generic webhook error:', error);
         res.status(500).json({
             success: false,
             error: error.message
