@@ -44,6 +44,7 @@ class FileStorage {
             const workflow = {
                 id: workflows.length + 1,
                 workflow_id: workflowData.workflow_id,
+                orkes_workflow_id: workflowData.orkes_workflow_id || null,
                 business_name: workflowData.business_name,
                 applicant_email: workflowData.applicant_email,
                 status: workflowData.status || 'RUNNING',
@@ -83,6 +84,16 @@ class FileStorage {
         }
     }
 
+    async getWorkflowByOrkesId(orkesWorkflowId) {
+        try {
+            const workflows = await fs.readJson(this.workflowsFile);
+            return workflows.find(w => w.orkes_workflow_id === orkesWorkflowId) || null;
+        } catch (error) {
+            console.error('Error getting workflow by Orkes ID:', error);
+            return null;
+        }
+    }
+
     async updateWorkflowStatus(workflowId, status) {
         try {
             const workflows = await fs.readJson(this.workflowsFile);
@@ -99,6 +110,26 @@ class FileStorage {
             return { changes: 0 };
         } catch (error) {
             console.error('Error updating workflow status:', error);
+            throw error;
+        }
+    }
+
+    async updateOrkesWorkflowId(workflowId, orkesWorkflowId) {
+        try {
+            const workflows = await fs.readJson(this.workflowsFile);
+            const workflowIndex = workflows.findIndex(w => w.workflow_id === workflowId);
+            
+            if (workflowIndex >= 0) {
+                workflows[workflowIndex].orkes_workflow_id = orkesWorkflowId;
+                workflows[workflowIndex].updated_at = new Date().toISOString();
+                await fs.writeJson(this.workflowsFile, workflows, { spaces: 2 });
+                console.log(`Workflow ${workflowId} updated with Orkes workflow ID: ${orkesWorkflowId}`);
+                return { changes: 1 };
+            }
+            
+            return { changes: 0 };
+        } catch (error) {
+            console.error('Error updating Orkes workflow ID:', error);
             throw error;
         }
     }

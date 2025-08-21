@@ -496,6 +496,14 @@ app.post('/submit-application', async (req, res) => {
             if (result.environment) {
                 console.log('Full Newman result environment:', JSON.stringify(result.environment, null, 2));
                 await updateDynamicEnvironment(workflowId, result.environment);
+                
+                // Extract and store the Orkes workflow ID for webhook lookups
+                const orkesWorkflowIdVar = result.environment.values?.find(v => v.key === 'workflowId');
+                if (orkesWorkflowIdVar) {
+                    const orkesWorkflowId = orkesWorkflowIdVar.value;
+                    console.log(`Storing Orkes workflow ID: ${orkesWorkflowId} for server workflow: ${workflowId}`);
+                    await db.updateOrkesWorkflowId(workflowId, orkesWorkflowId);
+                }
             } else {
                 console.log('Warning: No environment returned from Newman execution');
                 console.log('Full Newman result:', JSON.stringify(result, null, 2));
