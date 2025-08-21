@@ -537,16 +537,11 @@
 		}
 	],
 	"auth": {
-		"type": "apikey",
-		"apikey": [
+		"type": "bearer",
+		"bearer": [
 			{
-				"key": "value",
+				"key": "token",
 				"value": "{{orkes_jwt}}",
-				"type": "string"
-			},
-			{
-				"key": "key",
-				"value": "X-Authorization",
 				"type": "string"
 			}
 		]
