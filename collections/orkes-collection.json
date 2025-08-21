@@ -1,0 +1,58 @@
+{
+  "info": {
+    "name": "Orkes Workflow Collection - PLACEHOLDER",
+    "description": "Replace this file with your exported Postman collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "REPLACE WITH YOUR POSTMAN COLLECTION",
+      "item": [
+        {
+          "name": "Required folders:",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "# 1. Get JWT Token",
+              "host": ["example", "com"]
+            }
+          }
+        },
+        {
+          "name": "2. Start Onboarding Workflow",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "# Required folder name",
+              "host": ["example", "com"]
+            }
+          }
+        },
+        {
+          "name": "3. Get Running Task IDs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "# Required folder name",
+              "host": ["example", "com"]
+            }
+          }
+        },
+        {
+          "name": "4a. Submit Single Approver Response",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "# Required folder name",
+              "host": ["example", "com"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

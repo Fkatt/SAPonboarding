@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: sap-vendor-onboarding
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MAX_FILE_SIZE
+        value: 10485760
+      - key: ALLOWED_FILE_TYPES
+        value: pdf,doc,docx,jpg,jpeg,png,gif
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: DATABASE_PATH
+        value: ./database.db

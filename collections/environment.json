@@ -1,0 +1,21 @@
+{
+  "name": "Orkes Environment - PLACEHOLDER",
+  "values": [
+    {
+      "key": "REPLACE_WITH_YOUR_ENVIRONMENT",
+      "value": "Export your Postman environment and replace this file"
+    },
+    {
+      "key": "orkes_server_url",
+      "value": "YOUR_ORKES_SERVER_URL"
+    },
+    {
+      "key": "orkes_key_id",
+      "value": "YOUR_ORKES_KEY_ID"
+    },
+    {
+      "key": "orkes_key_secret",
+      "value": "YOUR_ORKES_KEY_SECRET"
+    }
+  ]
+}
