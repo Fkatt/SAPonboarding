@@ -663,6 +663,28 @@ app.post('/webhook', async (req, res) => {
     }
 });
 
+// Catch-all POST webhook endpoints
+app.post('/orkes-webhook', async (req, res) => {
+    console.log('=== ORKES WEBHOOK RECEIVED ===');
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    console.log('=== END ORKES WEBHOOK ===');
+    res.json({ success: true });
+});
+
+app.post('/workflow-complete', async (req, res) => {
+    console.log('=== WORKFLOW COMPLETE WEBHOOK ===');
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    console.log('=== END WORKFLOW COMPLETE ===');
+    res.json({ success: true });
+});
+
+app.post('/completion', async (req, res) => {
+    console.log('=== COMPLETION WEBHOOK ===');
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    console.log('=== END COMPLETION WEBHOOK ===');
+    res.json({ success: true });
+});
+
 // Orkes webhook endpoints
 app.post('/approval', async (req, res) => {
     try {
