@@ -1835,7 +1835,7 @@
                 const response = await fetch(`/workflow-status/${activeWorkflowId}`);
                 const result = await response.json();
 
-                if (result.success) {
+                if (result.success && result.status) {
                     const detailsDiv = document.getElementById('workflow-details');
                     const status = result.status;
                     const approverStatuses = result.approverStatuses || {};
@@ -1843,13 +1843,14 @@
                     let statusHtml = `
                         <p><strong>Workflow ID:</strong> ${result.workflowId}</p>
                         <p><strong>Status:</strong> <span class="status-badge status-${status.toLowerCase()}">${status}</span></p>
-                        <p><strong>Current Step:</strong> ${result.currentStep}</p>
+                        <p><strong>Current Step:</strong> ${result.currentStep || 'Unknown'}</p>
                     `;
 
                     if (Object.keys(approverStatuses).length > 0) {
                         statusHtml += '<p><strong>Approver Status:</strong></p><ul>';
                         Object.entries(approverStatuses).forEach(([approver, status]) => {
-                            statusHtml += `<li>${approver}: <span class="status-badge status-${status.toLowerCase()}">${status}</span></li>`;
+                            const safeStatus = status || 'PENDING';
+                            statusHtml += `<li>${approver}: <span class="status-badge status-${safeStatus.toLowerCase()}">${safeStatus}</span></li>`;
                         });
                         statusHtml += '</ul>';
                     }

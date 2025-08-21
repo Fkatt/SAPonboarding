@@ -1072,11 +1072,20 @@ app.use((req, res) => {
     });
 });
 
+// Debug: Log all API requests
+app.use('/api/notifications/*', (req, res, next) => {
+    console.log(`🚀 API Request: ${req.method} ${req.originalUrl}`);
+    console.log(`🚀 Params:`, req.params);
+    next();
+});
+
 // Notification API endpoints
 app.get('/api/notifications/:email', async (req, res) => {
     try {
         const { email } = req.params;
+        console.log(`📧 Fetching notifications for email: ${email}`);
         const notifications = await db.getNotificationsByEmail(email);
+        console.log(`📧 Found ${notifications.length} notifications for ${email}`);
         res.json(notifications);
     } catch (error) {
         console.error('Error fetching notifications:', error);
@@ -1087,7 +1096,9 @@ app.get('/api/notifications/:email', async (req, res) => {
 app.get('/api/notifications/:email/unread-count', async (req, res) => {
     try {
         const { email } = req.params;
+        console.log(`🔔 Fetching unread count for email: ${email}`);
         const count = await db.getUnreadNotificationCount(email);
+        console.log(`🔔 Unread count for ${email}: ${count}`);
         res.json({ count });
     } catch (error) {
         console.error('Error fetching unread count:', error);
