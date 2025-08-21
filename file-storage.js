@@ -8,6 +8,7 @@ class FileStorage {
         this.transactionsFile = path.join(this.dataDir, 'transactions.json');
         this.approversFile = path.join(this.dataDir, 'approvers.json');
         this.filesFile = path.join(this.dataDir, 'files.json');
+        this.notificationsFile = path.join(this.dataDir, 'notifications.json');
         this.initializeStorage();
     }
 
@@ -28,6 +29,9 @@ class FileStorage {
             }
             if (!await fs.pathExists(this.filesFile)) {
                 await fs.writeJson(this.filesFile, []);
+            }
+            if (!await fs.pathExists(this.notificationsFile)) {
+                await fs.writeJson(this.notificationsFile, []);
             }
             
             console.log('File storage initialized successfully');
@@ -329,6 +333,77 @@ class FileStorage {
         } catch (error) {
             console.error('Error getting pending applications:', error);
             return [];
+        }
+    }
+
+    // Notification operations
+    async insertNotification(notificationData) {
+        try {
+            const notifications = await fs.readJson(this.notificationsFile);
+            const notification = {
+                id: notifications.length + 1,
+                workflow_id: notificationData.workflow_id,
+                applicant_email: notificationData.applicant_email,
+                type: notificationData.type,
+                title: notificationData.title,
+                message: notificationData.message,
+                action_required: notificationData.action_required || false,
+                department: notificationData.department || '',
+                rejection_reason: notificationData.rejection_reason || '',
+                guidance: notificationData.guidance || '',
+                read: false,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            
+            notifications.push(notification);
+            await fs.writeJson(this.notificationsFile, notifications, { spaces: 2 });
+            console.log(`Notification inserted: ${notificationData.type} for ${notificationData.applicant_email}`);
+            return notification;
+        } catch (error) {
+            console.error('Error inserting notification:', error);
+            throw error;
+        }
+    }
+
+    async getNotificationsByEmail(applicantEmail) {
+        try {
+            const notifications = await fs.readJson(this.notificationsFile);
+            return notifications.filter(n => n.applicant_email === applicantEmail)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        } catch (error) {
+            console.error('Error getting notifications by email:', error);
+            return [];
+        }
+    }
+
+    async markNotificationAsRead(notificationId) {
+        try {
+            const notifications = await fs.readJson(this.notificationsFile);
+            const notificationIndex = notifications.findIndex(n => n.id === parseInt(notificationId));
+            
+            if (notificationIndex >= 0) {
+                notifications[notificationIndex].read = true;
+                notifications[notificationIndex].updated_at = new Date().toISOString();
+                await fs.writeJson(this.notificationsFile, notifications, { spaces: 2 });
+                console.log(`Notification ${notificationId} marked as read`);
+                return { changes: 1 };
+            }
+            
+            return { changes: 0 };
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+            throw error;
+        }
+    }
+
+    async getUnreadNotificationCount(applicantEmail) {
+        try {
+            const notifications = await fs.readJson(this.notificationsFile);
+            return notifications.filter(n => n.applicant_email === applicantEmail && !n.read).length;
+        } catch (error) {
+            console.error('Error getting unread notification count:', error);
+            return 0;
         }
     }
 

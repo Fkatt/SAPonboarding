@@ -31,6 +31,201 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .notification-bell {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .notification-bell:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .notification-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 380px;
+            height: 100vh;
+            background: white;
+            box-shadow: -3px 0 15px rgba(0,0,0,0.2);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .notification-panel.open {
+            right: 0;
+        }
+        
+        .notification-header {
+            padding: 20px;
+            background: #3498db;
+            color: white;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .notification-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        
+        .notification-list {
+            padding: 0;
+        }
+        
+        .notification-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #ecf0f1;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            position: relative;
+        }
+        
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .notification-item.unread {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .notification-item.rejection {
+            border-left: 4px solid #f44336;
+        }
+        
+        .notification-item.approval {
+            border-left: 4px solid #4caf50;
+        }
+        
+        .notification-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .notification-type-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .notification-type-badge.rejection {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .notification-type-badge.approval {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .notification-title-text {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+        }
+        
+        .notification-message {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.4;
+        }
+        
+        .notification-actions {
+            margin-top: 12px;
+        }
+        
+        .notification-action-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 8px;
+            transition: background 0.2s ease;
+        }
+        
+        .notification-action-btn:hover {
+            background: #2980b9;
+        }
+        
+        .notification-action-btn.secondary {
+            background: #95a5a6;
+        }
+        
+        .notification-action-btn.secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+            display: none;
+        }
+        
+        .notification-overlay.show {
+            display: block;
         }
 
         .header h1 {
@@ -471,13 +666,206 @@
                 transform: translateY(0);
             }
         }
+
+        /* Notification Panel Styles */
+        .notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .notification-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .notification-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 999;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .notification-panel.open {
+            right: 0;
+        }
+
+        .notification-header {
+            padding: 20px;
+            background: #3498db;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            transition: background 0.2s;
+        }
+
+        .notification-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .notification-list {
+            padding: 0;
+        }
+
+        .notification-empty {
+            padding: 40px 20px;
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .notification-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #ecf0f1;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .notification-item.rejection {
+            border-left: 4px solid #f44336;
+        }
+
+        .notification-item.approval {
+            border-left: 4px solid #4caf50;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+
+        .notification-message {
+            color: #34495e;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .notification-details {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .notification-details.expanded {
+            max-height: 200px;
+        }
+
+        .notification-department,
+        .notification-reason,
+        .notification-guidance {
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .notification-guidance {
+            color: #27ae60;
+        }
+
+        /* Transaction Details Styles */
+        .transaction-details {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .rejection-details {
+            color: #e74c3c;
+        }
+
+        .rejection-reason {
+            color: #c0392b;
+            font-weight: 500;
+        }
+
+        .rejection-details-text {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        /* Mobile responsive for notification panel */
+        @media (max-width: 768px) {
+            .notification-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <div class="notification-bell" onclick="toggleNotificationPanel()">
+                🔔
+                <span class="notification-badge" id="notification-badge">0</span>
+            </div>
             <h1>SAP Vendor Onboarding System</h1>
             <p>Streamlined vendor application processing with Orkes workflow integration</p>
+        </div>
+
+        <!-- Notification Panel -->
+        <div class="notification-overlay" id="notification-overlay" onclick="closeNotificationPanel()"></div>
+        <div class="notification-panel" id="notification-panel">
+            <div class="notification-header">
+                <h3>Notifications</h3>
+                <button class="notification-close" onclick="closeNotificationPanel()">×</button>
+            </div>
+            <div class="notification-list" id="notification-list">
+                <div class="notification-empty">No notifications yet</div>
+            </div>
         </div>
 
         <div class="tabs">
@@ -1085,13 +1473,35 @@
 
             let html = '';
             transactions.forEach(tx => {
+                // Parse details if it's JSON
+                let parsedDetails = null;
+                try {
+                    parsedDetails = tx.details ? JSON.parse(tx.details) : null;
+                } catch (e) {
+                    // If not JSON, use as is
+                }
+
+                // Format details display
+                let detailsDisplay = '';
+                if (tx.type === 'REJECTION' && parsedDetails) {
+                    detailsDisplay = `
+                        <div class="transaction-details rejection-details">
+                            <strong>${parsedDetails.rejecting_department}</strong><br>
+                            <span class="rejection-reason">Reason: ${parsedDetails.rejection_reason}</span>
+                            ${parsedDetails.rejection_details ? `<br><span class="rejection-details-text">${parsedDetails.rejection_details}</span>` : ''}
+                        </div>
+                    `;
+                } else {
+                    detailsDisplay = tx.details || '';
+                }
+
                 html += `
                     <tr>
                         <td>${tx.workflow_id || 'N/A'}</td>
                         <td>${tx.business_name || 'N/A'}</td>
                         <td><span class="status-badge">${tx.type}</span></td>
                         <td><span class="status-badge status-${tx.status.toLowerCase()}">${tx.status}</span></td>
-                        <td>${tx.details || ''}</td>
+                        <td>${detailsDisplay}</td>
                         <td>${new Date(tx.created_at).toLocaleString()}</td>
                     </tr>
                 `;
@@ -1123,11 +1533,149 @@
             }
         }, 10000); // Refresh every 10 seconds
 
+        // Notification system
+        function toggleNotificationPanel() {
+            const panel = document.getElementById('notification-panel');
+            const overlay = document.getElementById('notification-overlay');
+            
+            if (panel.classList.contains('open')) {
+                closeNotificationPanel();
+            } else {
+                openNotificationPanel();
+            }
+        }
+
+        function openNotificationPanel() {
+            const panel = document.getElementById('notification-panel');
+            const overlay = document.getElementById('notification-overlay');
+            
+            panel.classList.add('open');
+            overlay.classList.add('open');
+            
+            // Load notifications when panel opens
+            loadNotifications();
+        }
+
+        function closeNotificationPanel() {
+            const panel = document.getElementById('notification-panel');
+            const overlay = document.getElementById('notification-overlay');
+            
+            panel.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        async function loadNotifications() {
+            const applicantEmail = document.getElementById('applicant_email').value;
+            if (!applicantEmail) {
+                document.getElementById('notification-list').innerHTML = '<div class="notification-empty">Please enter your email to view notifications</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/notifications/${encodeURIComponent(applicantEmail)}`);
+                const notifications = await response.json();
+                
+                displayNotifications(notifications);
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notification-list').innerHTML = '<div class="notification-empty">Error loading notifications</div>';
+            }
+        }
+
+        function displayNotifications(notifications) {
+            const listElement = document.getElementById('notification-list');
+            
+            if (notifications.length === 0) {
+                listElement.innerHTML = '<div class="notification-empty">No notifications yet</div>';
+                return;
+            }
+
+            listElement.innerHTML = notifications.map(notification => `
+                <div class="notification-item ${notification.type.toLowerCase()} ${!notification.read ? 'unread' : ''}" 
+                     onclick="expandNotification(${notification.id})">
+                    <div class="notification-main">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-time">${new Date(notification.created_at).toLocaleDateString()} ${new Date(notification.created_at).toLocaleTimeString()}</div>
+                        <div class="notification-message">${notification.message}</div>
+                    </div>
+                    ${notification.action_required ? `
+                        <div class="notification-details" id="details-${notification.id}">
+                            <div class="notification-department"><strong>Department:</strong> ${notification.department}</div>
+                            ${notification.rejection_reason ? `<div class="notification-reason"><strong>Reason:</strong> ${notification.rejection_reason}</div>` : ''}
+                            ${notification.guidance ? `<div class="notification-guidance"><strong>Next Steps:</strong> ${notification.guidance}</div>` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function expandNotification(notificationId) {
+            const detailsElement = document.getElementById(`details-${notificationId}`);
+            if (detailsElement) {
+                detailsElement.classList.toggle('expanded');
+            }
+
+            // Mark as read
+            try {
+                await fetch(`/api/notifications/${notificationId}/mark-read`, {
+                    method: 'POST'
+                });
+                
+                // Update notification count
+                updateNotificationCount();
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        }
+
+        async function updateNotificationCount() {
+            const applicantEmail = document.getElementById('applicant_email').value;
+            if (!applicantEmail) {
+                document.getElementById('notification-badge').textContent = '0';
+                document.getElementById('notification-badge').style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/notifications/${encodeURIComponent(applicantEmail)}/unread-count`);
+                const result = await response.json();
+                
+                const badge = document.getElementById('notification-badge');
+                if (result.count > 0) {
+                    badge.textContent = result.count;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error updating notification count:', error);
+            }
+        }
+
+        // Update notification count when email changes
+        document.getElementById('applicant_email').addEventListener('input', () => {
+            setTimeout(updateNotificationCount, 500); // Debounce
+        });
+
         // Initial load
         document.addEventListener('DOMContentLoaded', () => {
             // Load initial data if on specific tabs
             loadApplications();
+            
+            // Update notification count if email is present
+            const applicantEmail = document.getElementById('applicant_email').value;
+            if (applicantEmail) {
+                updateNotificationCount();
+            }
         });
+
+        // Refresh notification count periodically
+        setInterval(() => {
+            const applicantEmail = document.getElementById('applicant_email').value;
+            if (applicantEmail) {
+                updateNotificationCount();
+            }
+        }, 30000); // Every 30 seconds
     </script>
 </body>
 </html>

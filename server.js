@@ -908,8 +908,12 @@ app.post('/rejection', async (req, res) => {
         // Extract applicant email from Orkes webhook payload  
         const applicantEmail = req.body.email || req.body.complete_submission?.applicant_email;
         const businessName = req.body.business_name || req.body.complete_submission?.application_data?.business_name;
+        const rejectionReason = req.body.reason || 'No reason provided';
+        const rejectingApprover = req.body.rejecting_approver || 'unknown';
+        const rejectionDetails = req.body.rejection_details || {};
         
         console.log(`Looking for workflow with applicant_email: ${applicantEmail} for rejection`);
+        console.log(`Rejecting approver: ${rejectingApprover}, Reason: ${rejectionReason}`);
         
         if (applicantEmail) {
             // Find the workflow by applicant email
@@ -920,11 +924,38 @@ app.post('/rejection', async (req, res) => {
                 
                 await db.updateWorkflowStatus(workflow.workflow_id, 'REJECTED');
                 
+                // Get department name from approver
+                const departmentMap = {
+                    'approver_1': 'Finance Department',
+                    'approver_2': 'Legal Department', 
+                    'approver_3': 'Procurement Department'
+                };
+                const departmentName = departmentMap[rejectingApprover] || 'Unknown Department';
+                
                 await db.insertTransaction({
                     workflow_id: workflow.workflow_id,
-                    type: 'WEBHOOK',
+                    type: 'REJECTION',
                     status: 'REJECTED',
-                    details: 'Final rejection received from Orkes webhook'
+                    details: JSON.stringify({
+                        rejecting_department: departmentName,
+                        rejection_reason: rejectionReason,
+                        rejection_details: rejectionDetails,
+                        business_name: businessName,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                // Create notification for the rejection
+                await db.insertNotification({
+                    workflow_id: workflow.workflow_id,
+                    applicant_email: applicantEmail,
+                    type: 'REJECTION',
+                    title: `Application Rejected - ${departmentName}`,
+                    message: `Your vendor application for "${businessName}" has been rejected by the ${departmentName}. Reason: ${rejectionReason}`,
+                    action_required: true,
+                    department: departmentName,
+                    rejection_reason: rejectionReason,
+                    guidance: `Please review the feedback from ${departmentName} and make the necessary corrections to your application. Once updated, you may resubmit your vendor application for review.`
                 });
                 
                 // Cleanup dynamic environment
@@ -981,6 +1012,40 @@ app.use((req, res) => {
         success: false,
         error: 'Endpoint not found'
     });
+});
+
+// Notification API endpoints
+app.get('/api/notifications/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        const notifications = await db.getNotificationsByEmail(email);
+        res.json(notifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.get('/api/notifications/:email/unread-count', async (req, res) => {
+    try {
+        const { email } = req.params;
+        const count = await db.getUnreadNotificationCount(email);
+        res.json({ count });
+    } catch (error) {
+        console.error('Error fetching unread count:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/api/notifications/:id/mark-read', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await db.markNotificationAsRead(id);
+        res.json({ success: result.changes > 0, changes: result.changes });
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 // Start server
