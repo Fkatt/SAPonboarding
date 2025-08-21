@@ -350,6 +350,28 @@ app.post('/check-workflow-status', async (req, res) => {
     }
 });
 
+// Debug endpoint to check existing workflows
+app.get('/debug/workflows', async (req, res) => {
+    try {
+        const workflows = await db.getWorkflows();
+        res.json({
+            success: true,
+            count: workflows.length,
+            workflows: workflows.map(w => ({
+                workflow_id: w.workflow_id,
+                business_name: w.business_name,
+                status: w.status,
+                created_at: w.created_at
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Health check endpoint
 app.get('/health', async (req, res) => {
     try {
@@ -521,14 +543,24 @@ app.post('/approver-response', async (req, res) => {
         console.log(`Approver response: ${workflowId}, Approver ${approverId}, Decision: ${decision}`);
 
         // Check if workflow exists before updating approver action
+        console.log(`Looking for workflow with ID: ${workflowId}`);
         const workflow = await db.getWorkflowById(workflowId);
+        console.log(`Workflow lookup result:`, workflow ? 'Found' : 'Not found');
+        
         if (!workflow) {
             console.error(`Workflow ${workflowId} not found in database. Cannot insert approver action.`);
+            
+            // Debug: Let's see what workflows exist
+            const allWorkflows = await db.getWorkflows();
+            console.log(`Available workflows:`, allWorkflows.map(w => w.workflow_id));
+            
             return res.status(404).json({
                 success: false,
                 error: 'Workflow not found'
             });
         }
+        
+        console.log(`Workflow found: ${workflow.workflow_id}, Status: ${workflow.status}`);
 
         // Update approver action in database
         await db.insertApproverAction(workflowId, approverId, decision, reason);
