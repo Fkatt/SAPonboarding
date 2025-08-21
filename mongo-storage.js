@@ -11,21 +11,35 @@ class MongoStorage {
 
     async initializeConnection() {
         try {
-            this.client = new MongoClient(this.connectionString);
+            this.client = new MongoClient(this.connectionString, {
+                serverSelectionTimeoutMS: 5000,
+                connectTimeoutMS: 10000,
+                tls: true,
+                tlsAllowInvalidHostnames: false,
+                tlsAllowInvalidCertificates: false
+            });
+            
             await this.client.connect();
             this.db = this.client.db(this.dbName);
+            
+            // Test the connection
+            await this.db.admin().ping();
             
             console.log('MongoDB connected successfully');
             console.log('Connected to database:', this.dbName);
         } catch (error) {
             console.error('MongoDB connection error:', error);
-            throw error;
+            // Fallback to null so methods can handle gracefully
+            this.db = null;
         }
     }
 
     // Workflow operations
     async insertWorkflow(workflowData) {
         try {
+            if (!this.db) {
+                throw new Error('Database not connected');
+            }
             const workflows = this.db.collection('workflows');
             const workflow = {
                 workflow_id: workflowData.workflow_id,
@@ -252,9 +266,47 @@ class MongoStorage {
         }
     }
 
+    // Missing method that's called by server
+    async getPendingApplications(approverId) {
+        try {
+            if (!this.db) return [];
+            
+            const workflows = this.db.collection('workflows');
+            const approvers = this.db.collection('approvers');
+            
+            // Get workflows that are running
+            const runningWorkflows = await workflows.find({ status: 'RUNNING' }).toArray();
+            
+            const pendingApplications = [];
+            for (let workflow of runningWorkflows) {
+                // Check if this approver has a pending task
+                const approverAction = await approvers.findOne({ 
+                    workflow_id: workflow.workflow_id, 
+                    approver_id: approverId,
+                    decision: 'PENDING'
+                });
+                
+                if (approverAction) {
+                    pendingApplications.push({
+                        workflowId: workflow.workflow_id,
+                        businessName: workflow.business_name,
+                        applicantEmail: workflow.applicant_email,
+                        createdAt: workflow.created_at,
+                        approverId: approverId
+                    });
+                }
+            }
+            
+            return pendingApplications;
+        } catch (error) {
+            console.error('Error getting pending applications:', error);
+            return [];
+        }
+    }
+
     getHealthStatus() {
         return {
-            status: 'healthy',
+            status: this.db ? 'healthy' : 'disconnected',
             type: 'mongodb',
             database: this.dbName,
             connected: this.client && this.client.topology && this.client.topology.isConnected()

@@ -266,6 +266,41 @@ class FileStorage {
         }
     }
 
+    async getPendingApplications(approverId) {
+        try {
+            const workflows = await fs.readJson(this.workflowsFile);
+            const approvers = await fs.readJson(this.approversFile);
+            
+            // Get workflows that are running
+            const runningWorkflows = workflows.filter(w => w.status === 'RUNNING');
+            
+            const pendingApplications = [];
+            for (let workflow of runningWorkflows) {
+                // Check if this approver has a pending task
+                const approverAction = approvers.find(a => 
+                    a.workflow_id === workflow.workflow_id && 
+                    a.approver_id === approverId &&
+                    a.decision === 'PENDING'
+                );
+                
+                if (approverAction) {
+                    pendingApplications.push({
+                        workflowId: workflow.workflow_id,
+                        businessName: workflow.business_name,
+                        applicantEmail: workflow.applicant_email,
+                        createdAt: workflow.created_at,
+                        approverId: approverId
+                    });
+                }
+            }
+            
+            return pendingApplications;
+        } catch (error) {
+            console.error('Error getting pending applications:', error);
+            return [];
+        }
+    }
+
     getHealthStatus() {
         return {
             status: 'healthy',
