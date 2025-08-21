@@ -672,35 +672,37 @@ app.get('/workflow-status/:workflowId', (req, res) => {
 });
 
 // Get all applications
-app.get('/applications', (req, res) => {
+app.get('/applications', async (req, res) => {
     try {
-        const applications = db.getWorkflows();
+        const applications = await db.getWorkflows();
         res.json({
             success: true,
-            applications
+            applications: applications || []
         });
     } catch (error) {
         console.error('Error getting applications:', error);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: error.message,
+            applications: []
         });
     }
 });
 
 // Get all transactions
-app.get('/transactions', (req, res) => {
+app.get('/transactions', async (req, res) => {
     try {
-        const transactions = db.getTransactions();
+        const transactions = await db.getTransactions();
         res.json({
             success: true,
-            transactions
+            transactions: transactions || []
         });
     } catch (error) {
         console.error('Error getting transactions:', error);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: error.message,
+            transactions: []
         });
     }
 });
