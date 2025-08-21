@@ -867,7 +867,7 @@
                 if (activeWorkflowId) {
                     await updateWorkflowStatus();
                 }
-            }, 2000); // Poll every 2 seconds
+            }, 10000); // Poll every 10 seconds (avoid rate limiting)
         }
 
         async function updateWorkflowStatus() {
