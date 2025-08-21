@@ -85,6 +85,9 @@ typings/
 *.sqlite
 database.db
 
+# File storage data
+data/
+
 # Uploaded files
 public/uploads/*
 !public/uploads/.gitkeep

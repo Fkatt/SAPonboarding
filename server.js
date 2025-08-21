@@ -9,13 +9,13 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const DatabaseManager = require('./database');
+const FileStorage = require('./file-storage');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Initialize database
-const db = new DatabaseManager();
+// Initialize file storage
+const db = new FileStorage();
 
 // Security middleware
 app.use(helmet({
@@ -348,14 +348,14 @@ app.post('/check-workflow-status', async (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
     try {
-        const dbHealth = db.getHealthStatus();
+        const storageHealth = db.getHealthStatus();
         res.json({
             status: 'healthy',
             timestamp: new Date().toISOString(),
             environment: process.env.NODE_ENV || 'development',
-            ...dbHealth
+            ...storageHealth
         });
     } catch (error) {
         res.status(500).json({
