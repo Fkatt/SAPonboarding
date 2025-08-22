@@ -1940,18 +1940,22 @@
                     <p id="page-subtitle" class="text-gray-500 mt-1">Fill out the form to start the vendor onboarding process.</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div class="notification-bell bg-blue-500 hover:bg-blue-600 transition-colors rounded-full p-2 cursor-pointer" onclick="toggleNotificationPanel()">
+                    <div class="notification-bell bg-blue-500 hover:bg-blue-600 transition-all duration-200 rounded-full p-2 cursor-pointer relative hover:scale-105 active:scale-95" onclick="toggleNotificationPanel()">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
-                        <span class="notification-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium" id="notification-badge" style="display: none;">0</span>
+                        <span class="notification-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-pulse" id="notification-badge" style="display: none;">0</span>
                     </div>
+                    <!-- Test notification button (dev only) -->
+                    <button onclick="createTestNotification()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 text-xs px-2 py-1 rounded opacity-50" title="Create test notification (dev)">
+                        Test
+                    </button>
                 </div>
             </header>
 
             <!-- Notification Panel -->
-            <div class="notification-overlay fixed inset-0 bg-black bg-opacity-50 z-40 hidden" id="notification-overlay" onclick="closeNotificationPanel()"></div>
-            <div class="notification-panel fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-60" id="notification-panel">
+            <div class="notification-overlay fixed inset-0 bg-black bg-opacity-50 z-40 hidden opacity-0 transition-opacity duration-300" id="notification-overlay" onclick="closeNotificationPanel()"></div>
+            <div class="notification-panel fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-50" id="notification-panel">
                 <div class="notification-header p-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 class="text-lg font-semibold">Notifications</h3>
                     <button class="notification-close text-gray-400 hover:text-gray-600" onclick="closeNotificationPanel()">×</button>
@@ -1962,8 +1966,8 @@
             </div>
 
             <!-- Application Details Modal -->
-            <div class="modal-overlay fixed inset-0 bg-black bg-opacity-60 z-70 hidden items-center justify-center p-4" id="application-modal-overlay" onclick="closeApplicationModal()">
-                <div class="application-modal bg-white w-full max-w-4xl rounded-xl shadow-xl transform transition-all duration-300" id="application-modal" onclick="event.stopPropagation()">
+            <div class="modal-overlay fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center p-4" id="application-modal-overlay" onclick="closeApplicationModal()" style="z-index: 1000;">
+                <div class="application-modal" id="application-modal" onclick="event.stopPropagation()">
                     <div class="modal-header p-6 bg-gray-800 text-white rounded-t-xl flex justify-between items-center">
                         <h2 class="text-xl font-semibold">Application Details</h2>
                         <button class="modal-close text-gray-300 hover:text-white text-2xl" onclick="closeApplicationModal()">×</button>
@@ -2409,11 +2413,13 @@
                         loadApproverCounts(); // Update badge counts
                         loadDepartmentApplications('1'); // Load Finance department by default
                         startApproverAutoRefresh(); // Start auto-refresh
+                        startReminderSystem(); // Start cool reminder system
                     }, 100);
                     break;
                 default:
-                    // Stop auto-refresh when leaving approvers tab
+                    // Stop auto-refresh and reminder system when leaving approvers tab
                     stopApproverAutoRefresh();
+                    stopReminderSystem();
                     break;
             }
         }
@@ -3323,7 +3329,7 @@
             const panel = document.getElementById('notification-panel');
             const overlay = document.getElementById('notification-overlay');
             
-            if (panel.classList.contains('open')) {
+            if (panel.classList.contains('translate-x-0')) {
                 closeNotificationPanel();
             } else {
                 openNotificationPanel();
@@ -3334,8 +3340,13 @@
             const panel = document.getElementById('notification-panel');
             const overlay = document.getElementById('notification-overlay');
             
-            panel.classList.add('open');
-            overlay.classList.add('open');
+            // Show overlay
+            overlay.classList.remove('hidden');
+            overlay.classList.add('opacity-100');
+            
+            // Show panel by removing translate-x-full
+            panel.classList.remove('translate-x-full');
+            panel.classList.add('translate-x-0');
             
             // Clear the notification badge when opened
             const badge = document.getElementById('notification-badge');
@@ -3350,8 +3361,15 @@
             const panel = document.getElementById('notification-panel');
             const overlay = document.getElementById('notification-overlay');
             
-            panel.classList.remove('open');
-            overlay.classList.remove('open');
+            // Hide panel by adding translate-x-full
+            panel.classList.add('translate-x-full');
+            panel.classList.remove('translate-x-0');
+            
+            // Hide overlay after animation
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('opacity-100');
+            }, 300);
         }
 
         async function loadNotifications() {
@@ -3430,30 +3448,94 @@
         async function updateNotificationCount() {
             const applicantEmail = document.getElementById('applicant_email').value;
             if (!applicantEmail) {
-                document.getElementById('notification-badge').textContent = '0';
-                document.getElementById('notification-badge').style.display = 'none';
+                const badge = document.getElementById('notification-badge');
+                if (badge) {
+                    badge.textContent = '0';
+                    badge.style.display = 'none';
+                }
                 return;
             }
 
             try {
+                console.log('Checking notifications for:', applicantEmail);
                 const response = await fetch(`/api/notifications/${encodeURIComponent(applicantEmail)}/unread-count`);
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 const result = await response.json();
+                console.log('Notification count result:', result);
                 
                 const badge = document.getElementById('notification-badge');
                 const count = result.count || 0;
-                if (count > 0) {
-                    badge.textContent = count;
-                    badge.style.display = 'block';
-                } else {
-                    badge.style.display = 'none';
+                if (badge) {
+                    if (count > 0) {
+                        badge.textContent = count;
+                        badge.style.display = 'flex';
+                        console.log('Showing notification badge with count:', count);
+                    } else {
+                        badge.style.display = 'none';
+                        console.log('Hiding notification badge - no unread notifications');
+                    }
                 }
             } catch (error) {
                 console.error('Error updating notification count:', error);
                 // Hide badge on error
-                document.getElementById('notification-badge').style.display = 'none';
+                const badge = document.getElementById('notification-badge');
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        // Auto-update notification count periodically
+        function startNotificationCheck() {
+            // Check immediately
+            updateNotificationCount();
+            
+            // Then check every 30 seconds
+            setInterval(() => {
+                updateNotificationCount();
+            }, 30000);
+        }
+
+        // Test function to create a sample notification (for development)
+        async function createTestNotification() {
+            const applicantEmail = document.getElementById('applicant_email').value;
+            if (!applicantEmail) {
+                alert('Please enter an email address first');
+                return;
+            }
+
+            try {
+                const testNotification = {
+                    workflow_id: 'TEST-' + Date.now(),
+                    applicant_email: applicantEmail,
+                    type: 'info',
+                    title: 'Test Notification',
+                    message: 'This is a test notification to verify the notification system is working.',
+                    action_required: false,
+                    department: 'System',
+                    rejection_reason: '',
+                    guidance: 'This is just a test - no action needed.'
+                };
+
+                console.log('Creating test notification:', testNotification);
+                const response = await fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testNotification)
+                });
+
+                if (response.ok) {
+                    console.log('Test notification created successfully');
+                    updateNotificationCount();
+                } else {
+                    console.error('Failed to create test notification');
+                }
+            } catch (error) {
+                console.error('Error creating test notification:', error);
             }
         }
 
@@ -3467,20 +3549,9 @@
             // Load initial data if on specific tabs
             loadApplications();
             
-            // Update notification count if email is present
-            const applicantEmail = document.getElementById('applicant_email').value;
-            if (applicantEmail) {
-                updateNotificationCount();
-            }
+            // Start notification checking system
+            startNotificationCheck();
         });
-
-        // Refresh notification count periodically
-        setInterval(() => {
-            const applicantEmail = document.getElementById('applicant_email').value;
-            if (applicantEmail) {
-                updateNotificationCount();
-            }
-        }, 60000); // Every 60 seconds
 
         // Application Details Modal Functions
         let modalInProgress = false;
@@ -3701,9 +3772,16 @@
             // Show overlay
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
+            overlay.style.display = 'flex';
+            overlay.style.visibility = 'visible';
+            overlay.style.opacity = '1';
             
             // Show modal with the custom CSS class
             modal.classList.add('open');
+            modal.style.display = 'block';
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            modal.style.zIndex = '1001';
             
             // Ensure body scroll is not locked
             document.body.style.overflow = 'auto';
@@ -3816,10 +3894,17 @@
             
             // Hide modal using custom CSS class
             modal.classList.remove('open');
+            modal.style.display = '';
+            modal.style.visibility = '';
+            modal.style.opacity = '';
+            modal.style.zIndex = '';
             
             setTimeout(() => {
                 overlay.classList.add('hidden');
                 overlay.classList.remove('flex');
+                overlay.style.display = '';
+                overlay.style.visibility = '';
+                overlay.style.opacity = '';
                 console.log('Modal closed');
             }, 300);
         }
@@ -4256,7 +4341,68 @@
             `;
         }
         
+        // Cool reminder tracking system
+        let reminderCounts = { '1': 0, '2': 0, '3': 0 };
+        let reminderInterval = null;
+        let applicationAges = { '1': [], '2': [], '3': [] }; // Track application ages per department
+        
+        function startReminderSystem() {
+            if (reminderInterval) clearInterval(reminderInterval);
+            
+            reminderInterval = setInterval(() => {
+                // Only increment if approvers tab is active and there are applications needing reminders
+                const approversTab = document.getElementById('approvers-tab');
+                if (approversTab && approversTab.classList.contains('active')) {
+                    Object.keys(applicationAges).forEach(deptId => {
+                        const apps = applicationAges[deptId];
+                        const overdueApps = apps.filter(age => age > 1); // Applications over 1 day
+                        
+                        if (overdueApps.length > 0) {
+                            reminderCounts[deptId]++;
+                            animateReminderIncrement(deptId);
+                            console.log(`📧 Reminder sent to department ${deptId}`);
+                        }
+                    });
+                }
+            }, 55000); // Every 55 seconds
+        }
+        
+        function stopReminderSystem() {
+            if (reminderInterval) {
+                clearInterval(reminderInterval);
+                reminderInterval = null;
+            }
+        }
+        
+        function animateReminderIncrement(deptId) {
+            const reminderEl = document.getElementById(`reminder-count-${deptId}`);
+            if (reminderEl) {
+                // Cool pulse animation
+                reminderEl.style.transform = 'scale(1.2)';
+                reminderEl.style.transition = 'all 0.3s ease';
+                reminderEl.style.color = '#ef4444'; // Red flash
+                
+                setTimeout(() => {
+                    reminderEl.style.transform = 'scale(1)';
+                    reminderEl.style.color = '#f97316'; // Back to orange
+                    updateReminderDisplay(deptId);
+                }, 300);
+                
+                // Add a small notification icon animation
+                const badge = document.getElementById(`${deptId === '1' ? 'finance' : deptId === '2' ? 'legal' : 'procurement'}-badge`);
+                if (badge) {
+                    badge.style.animation = 'pulse 0.5s ease-in-out';
+                    setTimeout(() => {
+                        badge.style.animation = '';
+                    }, 500);
+                }
+            }
+        }
+
         function updateReminderCount(deptId, applications) {
+            // Store application ages for reminder tracking
+            applicationAges[deptId] = [];
+            
             // Calculate applications needing attention based on days since submission
             let urgentCount = 0;
             let overdueCount = 0;
@@ -4264,21 +4410,29 @@
                 const createdDate = app.createdAt || app.created_at;
                 if (createdDate) {
                     const daysSinceSubmission = Math.floor((new Date() - new Date(createdDate)) / (1000 * 60 * 60 * 24));
+                    applicationAges[deptId].push(daysSinceSubmission);
+                    
                     if (daysSinceSubmission > 3) urgentCount++;
                     else if (daysSinceSubmission > 1) overdueCount++;
                 }
             });
             
+            updateReminderDisplay(deptId, urgentCount, overdueCount);
+        }
+        
+        function updateReminderDisplay(deptId, urgentCount = 0, overdueCount = 0) {
             const reminderEl = document.getElementById(`reminder-count-${deptId}`);
             if (reminderEl) {
-                if (urgentCount > 0) {
-                    reminderEl.textContent = `${urgentCount} urgent (3+ days)`;
-                    reminderEl.className = 'text-xs text-red-500 mt-1 font-medium';
-                } else if (overdueCount > 0) {
-                    reminderEl.textContent = `${overdueCount} needs attention`;
+                const totalReminders = reminderCounts[deptId];
+                
+                if (urgentCount > 0 || totalReminders > 0) {
+                    reminderEl.textContent = `${totalReminders} reminders sent`;
                     reminderEl.className = 'text-xs text-orange-500 mt-1 font-medium';
+                } else if (overdueCount > 0) {
+                    reminderEl.textContent = `${overdueCount} pending review`;
+                    reminderEl.className = 'text-xs text-yellow-500 mt-1 font-medium';
                 } else {
-                    reminderEl.textContent = 'All current';
+                    reminderEl.textContent = 'All up to date';
                     reminderEl.className = 'text-xs text-green-500 mt-1';
                 }
             }

@@ -149,6 +149,17 @@ app.post('/api/notifications/:id/mark-read', async (req, res) => {
     }
 });
 
+app.post('/api/notifications', async (req, res) => {
+    try {
+        const notificationData = req.body;
+        const result = await db.insertNotification(notificationData);
+        res.json({ success: true, notification: result });
+    } catch (error) {
+        console.error('Error creating notification:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Newman integration functions
