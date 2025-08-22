@@ -2436,6 +2436,11 @@
 
         // Applications management
         async function loadApplications() {
+            // Only load if applications tab is active/exists
+            if (!document.getElementById('applications-table')) {
+                return;
+            }
+            
             try {
                 const response = await fetch('/applications');
                 const result = await response.json();
@@ -2447,8 +2452,12 @@
                     throw new Error(result.error);
                 }
             } catch (error) {
-                document.getElementById('applications-table').innerHTML = 
-                    `<tr><td colspan="6" style="text-align: center; color: #e74c3c;">Error loading applications: ${error.message}</td></tr>`;
+                const tableBody = document.getElementById('applications-table');
+                if (tableBody) {
+                    tableBody.innerHTML = 
+                        `<tr><td colspan="7" style="text-align: center; color: #e74c3c;">Error loading applications: ${error.message}</td></tr>`;
+                }
+                console.error('Error loading applications:', error);
             }
         }
 
@@ -2464,10 +2473,13 @@
             const tableBody = document.getElementById('applications-table');
             const countElement = document.getElementById('applications-count');
             
-            // Update count
-            if (countElement) {
-                countElement.textContent = `Business Partners (${applications.length})`;
+            // Exit early if elements don't exist (tab not active)
+            if (!tableBody || !countElement) {
+                return;
             }
+            
+            // Update count
+            countElement.textContent = `Business Partners (${applications.length})`;
 
             if (applications.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #6b7280; padding: 40px;">No applications found</td></tr>';
@@ -2878,14 +2890,16 @@
         // Application Details Modal Functions
         async function showApplicationDetails(workflowId) {
             try {
-                // Fetch detailed application data and transactions for timeline
-                const [appResponse, transactionResponse] = await Promise.all([
+                // Fetch detailed application data, transactions, and workflow status with approvers
+                const [appResponse, transactionResponse, workflowStatusResponse] = await Promise.all([
                     fetch('/applications'),
-                    fetch('/transactions')
+                    fetch('/transactions'),
+                    fetch(`/workflow-status/${workflowId}`)
                 ]);
                 
                 const appResult = await appResponse.json();
                 const transactionResult = await transactionResponse.json();
+                const workflowStatusResult = await workflowStatusResponse.json();
                 
                 if (appResult.success) {
                     const application = appResult.applications.find(app => 
@@ -2894,7 +2908,8 @@
                     
                     if (application) {
                         const transactions = transactionResult.success ? transactionResult.transactions : [];
-                        displayApplicationModal(application, transactions.filter(t => t.workflow_id === workflowId));
+                        const workflowStatus = workflowStatusResult.success ? workflowStatusResult : null;
+                        displayApplicationModal(application, transactions.filter(t => t.workflow_id === workflowId), workflowStatus);
                     } else {
                         console.error('Application not found:', workflowId);
                     }
@@ -2904,7 +2919,7 @@
             }
         }
 
-        function displayApplicationModal(app, transactions = []) {
+        function displayApplicationModal(app, transactions = [], workflowStatus = null) {
             const modal = document.getElementById('application-modal');
             const overlay = document.getElementById('application-modal-overlay');
             const content = document.getElementById('application-modal-content');
@@ -2967,7 +2982,7 @@
 
                     <div class="approval-timeline">
                         <h3>🔄 Approval Timeline</h3>
-                        ${getApprovalTimeline(workflowId, app.status, transactions)}
+                        ${getApprovalTimeline(workflowId, app.status, transactions, workflowStatus)}
                     </div>
 
                     ${fileLinks ? `
@@ -2986,37 +3001,70 @@
             overlay.classList.add('open');
         }
 
-        function getApprovalTimeline(workflowId, status, transactions) {
+        function getApprovalTimeline(workflowId, status, transactions, workflowStatus = null) {
             const departments = [
                 { id: '1', name: 'Finance Department', email: 'finance.approver@sapco.com', icon: '💰' },
                 { id: '2', name: 'Legal Department', email: 'legal.approver@sapco.com', icon: '⚖️' },
                 { id: '3', name: 'Procurement Department', email: 'procurement.approver@sapco.com', icon: '📦' }
             ];
 
+            console.log('Approval timeline - workflowId:', workflowId, 'workflowStatus:', workflowStatus, 'transactions:', transactions);
+
             return departments.map(dept => {
-                // Find approver response transaction for this department
-                const approverTransaction = transactions.find(t => 
-                    t.type === 'APPROVER_RESPONSE' && 
-                    t.details && t.details.includes(`Approver ${dept.id}`)
-                );
-                
                 let timelineStatus = '⏳ Pending Review';
                 let avatarClass = 'pending';
                 let timestamp = '';
                 
-                if (approverTransaction) {
-                    const isApproved = approverTransaction.details.includes('APPROVED');
-                    const isRejected = approverTransaction.details.includes('REJECTED');
+                // Check workflow status for approver decisions first
+                if (workflowStatus && workflowStatus.approvers) {
+                    const approverKey = `approver${dept.id}`;
+                    const approverStatus = workflowStatus.approvers[approverKey];
                     
-                    if (isApproved) {
-                        timelineStatus = '✅ Approved';
-                        avatarClass = 'approved';
-                    } else if (isRejected) {
-                        timelineStatus = '❌ Rejected';
-                        avatarClass = 'rejected';
+                    if (approverStatus && approverStatus !== 'PENDING') {
+                        if (approverStatus === 'APPROVED') {
+                            timelineStatus = '✅ Approved';
+                            avatarClass = 'approved';
+                        } else if (approverStatus === 'REJECTED') {
+                            timelineStatus = '❌ Rejected';
+                            avatarClass = 'rejected';
+                        }
+                        
+                        // Try to find corresponding transaction for timestamp
+                        const approverTransaction = transactions.find(t => 
+                            (t.type === 'APPROVER_RESPONSE' || t.type === 'approver_response' || t.type === 'APPROVER') && 
+                            t.workflow_id === workflowId &&
+                            (t.details && (t.details.includes(`Approver ${dept.id}`) || t.details.includes(`approver${dept.id}`)))
+                        );
+                        
+                        if (approverTransaction) {
+                            timestamp = new Date(approverTransaction.created_at).toLocaleString();
+                        } else {
+                            // Use workflow creation time as fallback
+                            timestamp = workflowStatus.createdAt ? new Date(workflowStatus.createdAt).toLocaleString() : '';
+                        }
                     }
+                } else {
+                    // Fallback to transaction-based lookup
+                    const approverTransaction = transactions.find(t => 
+                        (t.type === 'APPROVER_RESPONSE' || t.type === 'approver_response' || t.type === 'APPROVER') && 
+                        t.workflow_id === workflowId &&
+                        (t.details && (t.details.includes(`Approver ${dept.id}`) || t.details.includes(`approver${dept.id}`)))
+                    );
                     
-                    timestamp = new Date(approverTransaction.created_at).toLocaleString();
+                    if (approverTransaction) {
+                        const isApproved = approverTransaction.details.toLowerCase().includes('approved');
+                        const isRejected = approverTransaction.details.toLowerCase().includes('rejected');
+                        
+                        if (isApproved) {
+                            timelineStatus = '✅ Approved';
+                            avatarClass = 'approved';
+                        } else if (isRejected) {
+                            timelineStatus = '❌ Rejected';
+                            avatarClass = 'rejected';
+                        }
+                        
+                        timestamp = new Date(approverTransaction.created_at).toLocaleString();
+                    }
                 }
                 
                 return `
