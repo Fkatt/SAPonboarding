@@ -1108,8 +1108,120 @@
             `;
         }
 
-        function showApplicationDetails(workflowId) {
-            openModal('application-modal');
+        async function showApplicationDetails(workflowId) {
+            try {
+                // Fetch application details from server
+                const response = await fetch(`/application/${workflowId}`);
+                if (!response.ok) {
+                    // If specific endpoint doesn't exist, try to find it in applications list
+                    const appsResponse = await fetch('/applications');
+                    const appsResult = await appsResponse.json();
+                    if (appsResult.success) {
+                        const app = appsResult.applications.find(a => a.workflow_id === workflowId);
+                        if (app) {
+                            displayApplicationDetailModal(app);
+                            openModal('application-modal');
+                        } else {
+                            showCustomAlert('Error', 'Application not found', 'error');
+                        }
+                    }
+                    return;
+                }
+                
+                const result = await response.json();
+                if (result.success && result.application) {
+                    displayApplicationDetailModal(result.application);
+                    openModal('application-modal');
+                } else {
+                    showCustomAlert('Error', 'Failed to load application details', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading application details:', error);
+                showCustomAlert('Error', 'Error loading application details', 'error');
+            }
+        }
+
+        function displayApplicationDetailModal(app) {
+            const content = document.getElementById('application-modal-content');
+            if (!content) return;
+
+            // Parse form data if it's a string
+            let formData = app.form_data;
+            if (typeof formData === 'string') {
+                try {
+                    formData = JSON.parse(formData);
+                } catch (e) {
+                    formData = {};
+                }
+            }
+
+            const statusClass = {
+                'RUNNING': 'bg-blue-100 text-blue-800',
+                'APPROVED': 'bg-green-100 text-green-800', 
+                'REJECTED': 'bg-red-100 text-red-800'
+            }[app.status] || 'bg-gray-100 text-gray-800';
+
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Status and Basic Info -->
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">${app.business_name || 'Unknown Business'}</h3>
+                            <p class="text-gray-600">${app.applicant_email || 'No email'}</p>
+                        </div>
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full ${statusClass}">${app.status}</span>
+                    </div>
+
+                    <!-- Workflow Information -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-900 mb-3">Workflow Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div><span class="font-medium">Workflow ID:</span> ${app.workflow_id || 'N/A'}</div>
+                            <div><span class="font-medium">Orkes ID:</span> ${app.orkes_workflow_id || 'N/A'}</div>
+                            <div><span class="font-medium">Submitted:</span> ${app.created_at ? new Date(app.created_at).toLocaleString() : 'N/A'}</div>
+                            <div><span class="font-medium">Updated:</span> ${app.updated_at ? new Date(app.updated_at).toLocaleString() : 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    <!-- Contact & Business Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-3">Contact Information</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><span class="font-medium">Email:</span> ${formData.applicant_email || app.applicant_email || 'N/A'}</p>
+                                <p><span class="font-medium">Phone:</span> ${formData.business_contact_number || 'N/A'}</p>
+                                <p><span class="font-medium">Address:</span> ${formData.address || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-3">Business Details</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><span class="font-medium">Business Name:</span> ${formData.business_name || app.business_name || 'N/A'}</p>
+                                <p><span class="font-medium">License ID:</span> ${formData.business_license_id || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Uploaded Files -->
+                    ${app.file_count > 0 ? `
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-3">Uploaded Documents (${app.file_count})</h4>
+                            <div class="space-y-2">
+                                ${app.file_names ? app.file_names.split(',').map((name, index) => {
+                                    const urls = app.file_urls ? app.file_urls.split(',') : [];
+                                    const url = urls[index];
+                                    return `
+                                        <div class="flex items-center justify-between bg-gray-50 rounded p-3">
+                                            <span class="text-sm text-gray-700">${name.trim()}</span>
+                                            ${url ? `<a href="${url.trim()}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">View</a>` : ''}
+                                        </div>
+                                    `;
+                                }).join('') : '<p class="text-sm text-gray-500">No file details available</p>'}
+                            </div>
+                        </div>
+                    ` : '<div><h4 class="font-semibold text-gray-900 mb-3">Documents</h4><p class="text-sm text-gray-500">No documents uploaded</p></div>'}
+                </div>
+            `;
         }
 
         function toggleNotificationPanel() {
