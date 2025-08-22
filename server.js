@@ -160,6 +160,18 @@ app.post('/api/notifications', async (req, res) => {
     }
 });
 
+// Serve README.md for documentation viewer
+app.get('/README.md', (req, res) => {
+    const readmePath = path.join(__dirname, 'README.md');
+    res.setHeader('Content-Type', 'text/markdown');
+    res.sendFile(readmePath, (err) => {
+        if (err) {
+            console.log('README.md not found');
+            res.status(404).send('Documentation file not found');
+        }
+    });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Newman integration functions

@@ -2177,6 +2177,12 @@
                                     </svg>
                                     Assets Manager
                                 </a>
+                                <a href="#" class="admin-nav-item" data-section="documentation" onclick="showAdminSection('documentation'); return false;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    Documentation
+                                </a>
                             </nav>
                         </div>
                         
@@ -4034,6 +4040,9 @@
                 case 'assets':
                     loadAssetsManager();
                     break;
+                case 'documentation':
+                    loadDocumentationViewer();
+                    break;
             }
         }
 
@@ -4500,6 +4509,113 @@ Authorization: Bearer {{orkes_jwt}}</pre>
                     </div>
                 </div>
             `;
+        }
+
+        function loadDocumentationViewer() {
+            document.getElementById('admin-content-area').innerHTML = `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">System Documentation</h3>
+                        <p class="text-sm text-gray-600 mt-1">Complete technical documentation for the SAP Vendor Onboarding System</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <div class="text-sm font-medium text-blue-900">Documentation File Location</div>
+                                    <div class="text-sm text-blue-700 mt-1"><code>README.md</code> in the project root directory</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="prose max-w-none" id="documentation-content">
+                            <div class="text-center py-4">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Loading documentation...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load the README.md content
+            loadReadmeContent();
+        }
+
+        async function loadReadmeContent() {
+            try {
+                const response = await fetch('/README.md');
+                if (!response.ok) {
+                    throw new Error('Documentation not found');
+                }
+                const markdownContent = await response.text();
+                
+                // Convert markdown to HTML (basic conversion)
+                const htmlContent = convertMarkdownToHtml(markdownContent);
+                
+                document.getElementById('documentation-content').innerHTML = htmlContent;
+            } catch (error) {
+                console.error('Error loading documentation:', error);
+                document.getElementById('documentation-content').innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.99-.833-2.76 0L3.054 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <div>
+                                <div class="text-sm font-medium text-red-900">Documentation Not Available</div>
+                                <div class="text-sm text-red-700 mt-1">Could not load README.md file. Please ensure it exists in the project root.</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function convertMarkdownToHtml(markdown) {
+            // Basic markdown to HTML conversion
+            let html = markdown
+                // Headers
+                .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">$1</h3>')
+                .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold text-gray-900 mt-8 mb-4">$1</h2>')
+                .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold text-gray-900 mt-8 mb-6">$1</h1>')
+                
+                // Code blocks
+                .replace(/\`\`\`([^`]+)\`\`\`/g, '<pre class="bg-gray-800 text-green-400 p-4 rounded-lg overflow-x-auto text-sm my-4"><code>$1</code></pre>')
+                
+                // Inline code
+                .replace(/\`([^`]+)\`/g, '<code class="bg-gray-100 text-red-600 px-2 py-1 rounded text-sm">$1</code>')
+                
+                // Bold text
+                .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+                
+                // Links
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:text-blue-800 underline" target="_blank">$1</a>')
+                
+                // Lists
+                .replace(/^- (.*$)/gm, '<li class="ml-4 mb-1">• $1</li>')
+                .replace(/^(\d+\.) (.*$)/gm, '<li class="ml-4 mb-1">$1 $2</li>')
+                
+                // Horizontal rules
+                .replace(/^---$/gm, '<hr class="border-gray-300 my-6">')
+                
+                // Paragraphs
+                .replace(/\n\n/g, '</p><p class="mb-4">')
+                .replace(/^([^<\n].*)$/gm, '<p class="mb-4">$1</p>');
+            
+            // Clean up empty paragraphs and fix list formatting
+            html = html
+                .replace(/<p class="mb-4"><\/p>/g, '')
+                .replace(/(<li[^>]*>.*<\/li>\s*)+/g, '<ul class="list-none mb-4">$&</ul>')
+                .replace(/<p class="mb-4">(<h[1-6][^>]*>.*<\/h[1-6]>)<\/p>/g, '$1');
+            
+            return '<div class="prose max-w-none">' + html + '</div>';
         }
 
         // Initial load
