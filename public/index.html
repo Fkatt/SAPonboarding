@@ -755,7 +755,7 @@
 
                 try {
                     const requestPayload = { formData: data };
-                    console.log('Request payload being sent:', requestPayload);
+                    console.log('Request payload being sent:', JSON.stringify(requestPayload, null, 2));
                     
                     const response = await fetch('/submit-application', {
                         method: 'POST',
@@ -1215,20 +1215,25 @@
 
         async function submitApproverDecision(workflowId, approverId, decision, reason = '') {
             try {
+                const payload = {
+                    workflowId: workflowId,
+                    approverId: approverId,
+                    decision: decision,
+                    reason: reason
+                };
+                
+                console.log('Submitting approver decision:', JSON.stringify(payload, null, 2));
+                
                 const response = await fetch('/approver-response', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        workflowId: workflowId,
-                        approverId: approverId,
-                        decision: decision,
-                        reason: reason
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const result = await response.json();
+                console.log('Approver decision response:', JSON.stringify(result, null, 2));
 
                 if (result.success) {
                     // Close the modal and refresh the approver counts
