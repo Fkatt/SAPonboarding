@@ -1015,7 +1015,7 @@
             
             // Show first application details if any exist
             if (applications.length > 0) {
-                showApplicationInDetail(applications[0].workflow_id, 0, approverId);
+                showApplicationInDetail(applications[0].workflowId, 0, approverId);
             }
         }
 
@@ -1042,8 +1042,8 @@
                 <div class="bg-white rounded-lg p-6 shadow-sm">
                     <div class="flex justify-between items-start mb-6">
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-900">${app.business_name || 'Unknown Business'}</h3>
-                            <p class="text-gray-600">${app.contact_email || 'No email provided'}</p>
+                            <h3 class="text-xl font-semibold text-gray-900">${app.businessName || 'Unknown Business'}</h3>
+                            <p class="text-gray-600">${app.applicantEmail || 'No email provided'}</p>
                         </div>
                         <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">Pending Review</span>
                     </div>
@@ -1052,17 +1052,17 @@
                         <div>
                             <h4 class="font-semibold text-gray-900 mb-3">Contact Information</h4>
                             <div class="space-y-2 text-sm">
-                                <p><span class="font-medium">Name:</span> ${app.contact_name || 'N/A'}</p>
-                                <p><span class="font-medium">Email:</span> ${app.contact_email || 'N/A'}</p>
-                                <p><span class="font-medium">Phone:</span> ${app.contact_phone || 'N/A'}</p>
+                                <p><span class="font-medium">Name:</span> ${app.contactName || 'N/A'}</p>
+                                <p><span class="font-medium">Email:</span> ${app.applicantEmail || 'N/A'}</p>
+                                <p><span class="font-medium">Phone:</span> ${app.contactPhone || 'N/A'}</p>
                             </div>
                         </div>
                         <div>
                             <h4 class="font-semibold text-gray-900 mb-3">Business Details</h4>
                             <div class="space-y-2 text-sm">
-                                <p><span class="font-medium">Business Type:</span> ${app.business_type || 'N/A'}</p>
-                                <p><span class="font-medium">Submitted:</span> ${app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A'}</p>
-                                <p><span class="font-medium">Workflow ID:</span> ${app.workflow_id || 'N/A'}</p>
+                                <p><span class="font-medium">Business Type:</span> ${app.businessType || 'N/A'}</p>
+                                <p><span class="font-medium">Submitted:</span> ${app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'N/A'}</p>
+                                <p><span class="font-medium">Workflow ID:</span> ${app.workflowId || 'N/A'}</p>
                             </div>
                         </div>
                     </div>
@@ -1070,15 +1070,15 @@
                     <div class="border-t border-gray-200 pt-6">
                         <h4 class="font-semibold text-gray-900 mb-4">Review Actions</h4>
                         <div class="flex gap-3">
-                            <button onclick="submitApproverDecision('${app.workflow_id}', '${approverId}', 'APPROVED')" 
+                            <button onclick="submitApproverDecision('${app.workflowId}', '${approverId}', 'APPROVED')" 
                                     class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium">
                                 ✓ Approve
                             </button>
-                            <button onclick="promptRejectReason('${app.workflow_id}', '${approverId}')" 
+                            <button onclick="promptRejectReason('${app.workflowId}', '${approverId}')" 
                                     class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium">
                                 ✗ Reject
                             </button>
-                            <button onclick="showApplicationDetails('${app.workflow_id}')" 
+                            <button onclick="showApplicationDetails('${app.workflowId}')" 
                                     class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
                                 📋 Full Details
                             </button>
