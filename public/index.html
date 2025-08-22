@@ -1023,13 +1023,13 @@
             // Populate the inbox list (left panel)
             inboxList.innerHTML = applications.map((app, index) => `
                 <div class="inbox-item p-3 rounded-lg cursor-pointer hover:bg-gray-50 border-l-4 border-yellow-400" 
-                     onclick="showApplicationInDetail('${app.workflow_id}', ${index}, '${approverId}')">
+                     onclick="showApplicationInDetail('${app.workflowId}', ${index}, '${approverId}')">
                     <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-medium text-sm text-gray-900 truncate">${app.business_name || 'Unknown Business'}</h4>
+                        <h4 class="font-medium text-sm text-gray-900 truncate">${app.businessName || 'Unknown Business'}</h4>
                         <span class="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">Pending</span>
                     </div>
-                    <p class="text-xs text-gray-600 mb-1">${app.contact_email || 'No email'}</p>
-                    <p class="text-xs text-gray-500">${app.created_at ? new Date(app.created_at).toLocaleDateString() : 'Unknown date'}</p>
+                    <p class="text-xs text-gray-600 mb-1">${app.applicantEmail || 'No email'}</p>
+                    <p class="text-xs text-gray-500">${app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'Unknown date'}</p>
                 </div>
             `).join('');
             
