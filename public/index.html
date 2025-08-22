@@ -879,10 +879,30 @@
                 try {
                     if (tx.details && tx.details.startsWith('{')) {
                         const parsed = JSON.parse(tx.details);
+                        
                         if (tx.type === 'APPROVER_RESPONSE') {
                             const dept = getDepartmentName(parsed.approverId);
                             const decisionClass = parsed.decision === 'APPROVED' ? 'text-green-600' : 'text-red-600';
                             displayDetails = `${dept} <span class="font-semibold ${decisionClass}">${parsed.decision}</span>`;
+                        }
+                        else if (parsed.rejecting_department) {
+                            // Handle workflow rejection details
+                            const dept = parsed.rejecting_department;
+                            const reason = parsed.rejection_reason;
+                            displayDetails = `<span class="text-red-600 font-semibold">Application Rejected</span> by ${dept}<br>`;
+                            if (reason) {
+                                displayDetails += `<span class="text-sm text-gray-600">Reason: ${reason}</span>`;
+                            }
+                        }
+                        else if (parsed.business_name && parsed.timestamp) {
+                            // Handle general workflow completion
+                            if (parsed.rejection_details) {
+                                displayDetails = `<span class="text-red-600 font-semibold">Workflow Completed - Rejected</span><br>`;
+                                displayDetails += `<span class="text-sm text-gray-600">Business: ${parsed.business_name}</span>`;
+                            } else {
+                                displayDetails = `<span class="text-green-600 font-semibold">Workflow Completed - Approved</span><br>`;
+                                displayDetails += `<span class="text-sm text-gray-600">Business: ${parsed.business_name}</span>`;
+                            }
                         }
                     }
                 } catch (e) {
