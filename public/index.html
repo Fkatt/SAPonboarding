@@ -990,47 +990,102 @@
 
         function displayApproverModal(approverId, applications) {
             const modal = document.getElementById('approver-modal');
-            const content = document.getElementById('approver-modal-content');
+            const inboxList = document.getElementById('approver-inbox-list');
             const title = document.getElementById('approver-modal-title');
+            const subtitle = document.getElementById('approver-modal-subtitle');
             
-            if (!modal || !content || !title) return;
+            if (!modal || !inboxList || !title) return;
             
             const departmentInfo = getDepartmentInfo(approverId);
-            title.textContent = `${departmentInfo.name} - Pending Applications`;
+            title.textContent = `${departmentInfo.name}`;
+            subtitle.textContent = `${applications.length} pending applications`;
             
-            content.innerHTML = applications.map(app => `
-                <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h4 class="font-semibold text-gray-900">${app.business_name || 'N/A'}</h4>
-                            <p class="text-sm text-gray-600">${app.contact_email || 'N/A'}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Pending</span>
-                        </div>
+            // Populate the inbox list (left panel)
+            inboxList.innerHTML = applications.map((app, index) => `
+                <div class="inbox-item p-3 rounded-lg cursor-pointer hover:bg-gray-50 border-l-4 border-yellow-400" 
+                     onclick="showApplicationInDetail('${app.workflow_id}', ${index}, '${approverId}')">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-medium text-sm text-gray-900 truncate">${app.business_name || 'Unknown Business'}</h4>
+                        <span class="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">Pending</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div><span class="font-medium">Contact:</span> ${app.contact_name || 'N/A'}</div>
-                        <div><span class="font-medium">Phone:</span> ${app.contact_phone || 'N/A'}</div>
-                        <div><span class="font-medium">Type:</span> ${app.business_type || 'N/A'}</div>
-                        <div><span class="font-medium">Submitted:</span> ${app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A'}</div>
-                    </div>
-                    <div class="mt-4 flex gap-2">
-                        <button onclick="submitApproverDecision('${app.workflow_id}', '${approverId}', 'APPROVED')" 
-                                class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg">
-                            Approve
-                        </button>
-                        <button onclick="promptRejectReason('${app.workflow_id}', '${approverId}')" 
-                                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg">
-                            Reject
-                        </button>
-                        <button onclick="showApplicationDetails('${app.workflow_id}')" 
-                                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg">
-                            View Details
-                        </button>
-                    </div>
+                    <p class="text-xs text-gray-600 mb-1">${app.contact_email || 'No email'}</p>
+                    <p class="text-xs text-gray-500">${app.created_at ? new Date(app.created_at).toLocaleDateString() : 'Unknown date'}</p>
                 </div>
             `).join('');
+            
+            // Show first application details if any exist
+            if (applications.length > 0) {
+                showApplicationInDetail(applications[0].workflow_id, 0, approverId);
+            }
+        }
+
+        function showApplicationInDetail(workflowId, index, approverId) {
+            // Find the application data from the current department
+            fetch(`/approver-queue/${approverId}`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success && result.applications[index]) {
+                        const app = result.applications[index];
+                        displayApplicationDetail(app, approverId);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading application detail:', error);
+                });
+        }
+
+        function displayApplicationDetail(app, approverId) {
+            const detailDiv = document.getElementById('approver-inbox-detail');
+            if (!detailDiv) return;
+            
+            detailDiv.innerHTML = `
+                <div class="bg-white rounded-lg p-6 shadow-sm">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">${app.business_name || 'Unknown Business'}</h3>
+                            <p class="text-gray-600">${app.contact_email || 'No email provided'}</p>
+                        </div>
+                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">Pending Review</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-3">Contact Information</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><span class="font-medium">Name:</span> ${app.contact_name || 'N/A'}</p>
+                                <p><span class="font-medium">Email:</span> ${app.contact_email || 'N/A'}</p>
+                                <p><span class="font-medium">Phone:</span> ${app.contact_phone || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-3">Business Details</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><span class="font-medium">Business Type:</span> ${app.business_type || 'N/A'}</p>
+                                <p><span class="font-medium">Submitted:</span> ${app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A'}</p>
+                                <p><span class="font-medium">Workflow ID:</span> ${app.workflow_id || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-200 pt-6">
+                        <h4 class="font-semibold text-gray-900 mb-4">Review Actions</h4>
+                        <div class="flex gap-3">
+                            <button onclick="submitApproverDecision('${app.workflow_id}', '${approverId}', 'APPROVED')" 
+                                    class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium">
+                                ✓ Approve
+                            </button>
+                            <button onclick="promptRejectReason('${app.workflow_id}', '${approverId}')" 
+                                    class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium">
+                                ✗ Reject
+                            </button>
+                            <button onclick="showApplicationDetails('${app.workflow_id}')" 
+                                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                                📋 Full Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function showApplicationDetails(workflowId) {
@@ -1176,20 +1231,8 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // Remove this application from the modal content
-                    const content = document.getElementById('approver-modal-content');
-                    const applicationDivs = content.children;
-                    for (let i = 0; i < applicationDivs.length; i++) {
-                        if (applicationDivs[i].innerHTML.includes(workflowId)) {
-                            content.removeChild(applicationDivs[i]);
-                            break;
-                        }
-                    }
-                    
-                    // Close modal if no applications left
-                    if (content.children.length === 0) {
-                        closeApproverModal();
-                    }
+                    // Close the modal and refresh the approver counts
+                    closeApproverModal();
                     
                     // Refresh pending counts
                     loadApproverCounts();
