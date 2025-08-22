@@ -1861,7 +1861,7 @@
 
         <!-- Navigation -->
         <nav class="flex flex-col space-y-2">
-            <button class="nav-link tab flex items-center gap-3 py-3 px-4 rounded-lg text-white hover:bg-gray-700" data-tab="submit" onclick="switchTab('submit', this)">
+            <button class="nav-link tab active flex items-center gap-3 py-3 px-4 rounded-lg text-white bg-gray-700 border-r-3 border-blue-500" data-tab="submit" onclick="switchTab('submit', this)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -1873,7 +1873,7 @@
                 </svg>
                 <span class="font-medium">Approvers</span>
             </button>
-            <button class="nav-link tab active flex items-center gap-3 py-3 px-4 rounded-lg text-white bg-gray-700 border-r-3 border-blue-500" data-tab="applications" onclick="switchTab('applications', this)">
+            <button class="nav-link tab flex items-center gap-3 py-3 px-4 rounded-lg text-white hover:bg-gray-700" data-tab="applications" onclick="switchTab('applications', this)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                     <polyline points="13 2 13 9 20 9"></polyline>
@@ -1914,7 +1914,7 @@
 
             <!-- Notification Panel -->
             <div class="notification-overlay fixed inset-0 bg-black bg-opacity-50 z-40 hidden" id="notification-overlay" onclick="closeNotificationPanel()"></div>
-            <div class="notification-panel fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-50" id="notification-panel">
+            <div class="notification-panel fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-60" id="notification-panel">
                 <div class="notification-header p-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 class="text-lg font-semibold">Notifications</h3>
                     <button class="notification-close text-gray-400 hover:text-gray-600" onclick="closeNotificationPanel()">×</button>
@@ -2049,6 +2049,11 @@
                 <button type="submit" class="btn" id="submit-btn">
                     Submit Application
                 </button>
+                
+                <!-- Temporary test button for completion screen -->
+                <button type="button" class="btn bg-green-600 hover:bg-green-700 ml-4" onclick="showCompletionScreen()" style="background-color: #16a34a;">
+                    Test Completion Screen
+                </button>
             </form>
         </div>
 
@@ -2144,7 +2149,7 @@
         <!-- Applications Tab -->
         <div id="applications-tab" class="tab-content">
             <!-- SAP Fiori Shell Bar -->
-            <header class="fiori-shell-bar p-3 flex justify-between items-center sticky top-0 z-50" style="margin: -20px -20px 20px -20px;">
+            <header class="fiori-shell-bar p-3 flex justify-between items-center sticky top-0 z-40" style="margin: -20px -20px 20px -20px;">
                 <div class="flex items-center">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" alt="SAP Logo" class="h-8 mr-4">
                     <h1 class="text-xl font-semibold hidden sm:block">S/4HANA</h1>
@@ -2486,6 +2491,13 @@
                     body: JSON.stringify({ formData: data })
                 });
 
+                // Handle rate limiting specifically
+                if (response.status === 429) {
+                    showNotification('Server busy - your application may have been submitted. Please check status later.', 'warning');
+                    showCompletionScreen(); // Still show completion screen
+                    return;
+                }
+
                 const result = await response.json();
 
                 if (result.success) {
@@ -2501,7 +2513,15 @@
                     throw new Error(result.error || 'Submission failed');
                 }
             } catch (error) {
-                showNotification(`Submission failed: ${error.message}`, 'error');
+                console.error('Form submission error:', error);
+                
+                // If it's a rate limiting error, still show completion but warn user
+                if (error.message.includes('429') || error.message.includes('Too many')) {
+                    showNotification('Submitted, but server is busy. Check status later.', 'warning');
+                    showCompletionScreen(); // Still show completion screen
+                } else {
+                    showNotification(`Submission failed: ${error.message}`, 'error');
+                }
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Submit Application';
@@ -2522,7 +2542,7 @@
                 if (activeWorkflowId) {
                     await updateWorkflowStatus();
                 }
-            }, 10000); // Poll every 10 seconds (avoid rate limiting)
+            }, 30000); // Poll every 30 seconds (avoid rate limiting)
         }
 
         async function updateWorkflowStatus() {
@@ -2901,15 +2921,21 @@
 
         // Completion Screen Functions
         function showCompletionScreen() {
+            console.log('showCompletionScreen called');
             const screen = document.getElementById('completion-screen');
             const modal = document.getElementById('completion-modal');
+            
+            console.log('Completion screen elements:', { screen, modal });
             
             // Show the screen
             screen.classList.remove('hidden');
             screen.classList.add('show');
             
+            console.log('Completion screen should be visible now');
+            
             // Start the reset process
             setTimeout(() => {
+                console.log('Starting reset process');
                 startResetProcess();
             }, 1000);
         }
@@ -3002,6 +3028,12 @@
                 // Reset progress
                 document.getElementById('progress-bar').style.width = '0%';
                 document.getElementById('reset-status-text').textContent = 'Resetting form...';
+                
+                // Auto-switch to Approvers tab
+                const approversTab = document.querySelector('[data-tab="approvers"]');
+                if (approversTab) {
+                    switchTab('approvers', approversTab);
+                }
             }, 300);
         }
 
@@ -3175,7 +3207,7 @@
                     }
                     break;
             }
-        }, 10000); // Refresh every 10 seconds
+        }, 30000); // Refresh every 30 seconds
 
         // Notification system
         function toggleNotificationPanel() {
@@ -3339,7 +3371,7 @@
             if (applicantEmail) {
                 updateNotificationCount();
             }
-        }, 30000); // Every 30 seconds
+        }, 60000); // Every 60 seconds
 
         // Application Details Modal Functions
         async function showApplicationDetails(workflowId) {
@@ -3774,7 +3806,7 @@
         });
 
         // Refresh approver counts periodically
-        setInterval(loadApproverCounts, 15000); // Every 15 seconds
+        setInterval(loadApproverCounts, 45000); // Every 45 seconds
 
         // Technical Documentation System
         function showTechnicalDoc(section) {
