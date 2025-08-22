@@ -600,6 +600,9 @@
             document.getElementById('custom-alert-close').addEventListener('click', () => closeModal('custom-alert-modal'));
         });
 
+        // Refresh approver counts periodically
+        setInterval(loadApproverCounts, 15000); // Every 15 seconds
+
         // Tab switching
         function switchTab(tabName, element) {
             // Remove active class from all tabs and content
@@ -623,7 +626,7 @@
                     loadTransactions();
                     break;
                 case 'approvers':
-                    loadApproverData();
+                    loadApproverCounts();
                     break;
             }
         }
@@ -745,10 +748,6 @@
                 const formData = new FormData(e.target);
                 const data = Object.fromEntries(formData.entries());
                 data.uploadedFiles = uploadedFiles;
-
-                // Debug logging to verify form data collection
-                console.log('Form data being submitted:', data);
-                console.log('Uploaded files:', uploadedFiles);
 
                 const submitBtn = document.getElementById('submit-btn');
                 submitBtn.disabled = true;
@@ -910,43 +909,31 @@
             return departments[approverId] || 'Unknown Department';
         }
 
-        // Load approver data
-        async function loadApproverData() {
-            try {
-                const response = await fetch('/approver-queue/all');
-                if (!response.ok) {
-                    // If endpoint doesn't exist, create mock data structure
-                    const mockDepartments = {
-                        '1': { name: 'Finance Department', email: 'finance@sapco.com', pending: 0 },
-                        '2': { name: 'Legal Department', email: 'legal@sapco.com', pending: 0 }, 
-                        '3': { name: 'Procurement Department', email: 'procurement@sapco.com', pending: 0 }
-                    };
-                    displayApproverCards(mockDepartments);
-                    return;
+        // Load approver counts for each department
+        async function loadApproverCounts() {
+            const departments = [1, 2, 3];
+            const departmentData = {
+                '1': { name: 'Finance Department', email: 'finance@sapco.com', pending: 0 },
+                '2': { name: 'Legal Department', email: 'legal@sapco.com', pending: 0 }, 
+                '3': { name: 'Procurement Department', email: 'procurement@sapco.com', pending: 0 }
+            };
+            
+            for (const deptId of departments) {
+                try {
+                    const response = await fetch(`/approver-queue/${deptId}`);
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            const count = result.applications ? result.applications.length : 0;
+                            departmentData[deptId.toString()].pending = count;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error loading approver count for department ${deptId}:`, error);
                 }
-                
-                const result = await response.json();
-                if (result.success && result.departments) {
-                    displayApproverCards(result.departments);
-                } else {
-                    // Fallback to mock data if response structure is unexpected
-                    const mockDepartments = {
-                        '1': { name: 'Finance Department', email: 'finance@sapco.com', pending: 0 },
-                        '2': { name: 'Legal Department', email: 'legal@sapco.com', pending: 0 }, 
-                        '3': { name: 'Procurement Department', email: 'procurement@sapco.com', pending: 0 }
-                    };
-                    displayApproverCards(mockDepartments);
-                }
-            } catch (error) {
-                console.error('Error loading approver data:', error);
-                // Fallback to mock data on error
-                const mockDepartments = {
-                    '1': { name: 'Finance Department', email: 'finance@sapco.com', pending: 0 },
-                    '2': { name: 'Legal Department', email: 'legal@sapco.com', pending: 0 }, 
-                    '3': { name: 'Procurement Department', email: 'procurement@sapco.com', pending: 0 }
-                };
-                displayApproverCards(mockDepartments);
             }
+            
+            displayApproverCards(departmentData);
         }
 
         function displayApproverCards(departments) {
@@ -984,8 +971,66 @@
         }
 
         // Modal and panel functions
-        function openApproverModal(approverId) {
-            openModal('approver-modal');
+        async function openApproverModal(approverId) {
+            try {
+                const response = await fetch(`/approver-queue/${approverId}`);
+                const result = await response.json();
+                
+                if (result.success && result.applications.length > 0) {
+                    displayApproverModal(approverId, result.applications);
+                    openModal('approver-modal');
+                } else {
+                    showCustomAlert('No Applications', 'No applications pending for this department.', 'info');
+                }
+            } catch (error) {
+                console.error('Error loading applications:', error);
+                showCustomAlert('Error', 'Error loading applications. Please try again.', 'error');
+            }
+        }
+
+        function displayApproverModal(approverId, applications) {
+            const modal = document.getElementById('approver-modal');
+            const content = document.getElementById('approver-modal-content');
+            const title = document.getElementById('approver-modal-title');
+            
+            if (!modal || !content || !title) return;
+            
+            const departmentInfo = getDepartmentInfo(approverId);
+            title.textContent = `${departmentInfo.name} - Pending Applications`;
+            
+            content.innerHTML = applications.map(app => `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-900">${app.business_name || 'N/A'}</h4>
+                            <p class="text-sm text-gray-600">${app.contact_email || 'N/A'}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Pending</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div><span class="font-medium">Contact:</span> ${app.contact_name || 'N/A'}</div>
+                        <div><span class="font-medium">Phone:</span> ${app.contact_phone || 'N/A'}</div>
+                        <div><span class="font-medium">Type:</span> ${app.business_type || 'N/A'}</div>
+                        <div><span class="font-medium">Submitted:</span> ${app.created_at ? new Date(app.created_at).toLocaleDateString() : 'N/A'}</div>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="submitApproverDecision('${app.workflow_id}', '${approverId}', 'APPROVED')" 
+                                class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg">
+                            Approve
+                        </button>
+                        <button onclick="promptRejectReason('${app.workflow_id}', '${approverId}')" 
+                                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg">
+                            Reject
+                        </button>
+                        <button onclick="showApplicationDetails('${app.workflow_id}')" 
+                                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function showApplicationDetails(workflowId) {
@@ -1082,6 +1127,81 @@
             };
             
             return docs[section] || { title: 'Documentation', content: 'No documentation available.' };
+        }
+
+        // Helper functions for department information
+        function getDepartmentInfo(approverId) {
+            const departments = {
+                '1': { 
+                    name: 'Finance Department', 
+                    email: 'finance.approver@sapco.com',
+                    icon: '💰'
+                },
+                '2': { 
+                    name: 'Legal Department', 
+                    email: 'legal.approver@sapco.com',
+                    icon: '⚖️'
+                },
+                '3': { 
+                    name: 'Procurement Department', 
+                    email: 'procurement.approver@sapco.com',
+                    icon: '📋'
+                }
+            };
+            return departments[approverId] || { name: 'Unknown Department', email: 'unknown@sapco.com', icon: '❓' };
+        }
+
+        function promptRejectReason(workflowId, approverId) {
+            const reason = prompt('Please provide a reason for rejection:');
+            if (reason !== null && reason.trim() !== '') {
+                submitApproverDecision(workflowId, approverId, 'REJECTED', reason.trim());
+            }
+        }
+
+        async function submitApproverDecision(workflowId, approverId, decision, reason = '') {
+            try {
+                const response = await fetch('/approver-response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        workflowId: workflowId,
+                        approverId: approverId,
+                        decision: decision,
+                        reason: reason
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Remove this application from the modal content
+                    const content = document.getElementById('approver-modal-content');
+                    const applicationDivs = content.children;
+                    for (let i = 0; i < applicationDivs.length; i++) {
+                        if (applicationDivs[i].innerHTML.includes(workflowId)) {
+                            content.removeChild(applicationDivs[i]);
+                            break;
+                        }
+                    }
+                    
+                    // Close modal if no applications left
+                    if (content.children.length === 0) {
+                        closeApproverModal();
+                    }
+                    
+                    // Refresh pending counts
+                    loadApproverCounts();
+                    
+                    showCustomAlert('Success', `Application ${decision.toLowerCase()} successfully!`, 'success');
+                } else {
+                    showCustomAlert('Error', 'Error submitting decision. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting approver decision:', error);
+                showCustomAlert('Error', 'Error submitting decision. Please try again.', 'error');
+            }
         }
 
         // Modal functions
