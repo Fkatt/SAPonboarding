@@ -3294,6 +3294,58 @@
                         </div>
 
                         <div class="doc-section">
+                            <h3>🔗 SAP S/4HANA Business Partner Integration</h3>
+                            <p><strong>SAP Base URL:</strong> https://your-s4hana-host/sap/opu/odata/sap/API_BUSINESS_PARTNER/</p>
+                            <p>When applications are approved, they automatically create Business Partners in SAP S/4HANA using the official A2X OData API.</p>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /oauth/token
+                                <p>Get OAuth2 token for SAP API authentication</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /A_BusinessPartner
+                                <p>Create new Business Partner record</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /A_BusinessPartnerRole
+                                <p>Add customer roles (FLCU00/FLCU01)</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /A_BusinessPartnerAddress
+                                <p>Add primary business address</p>
+                            </div>
+                            
+                            <h4>📋 Example: Create Business Partner</h4>
+                            <div class="json-code">{
+  "BusinessPartnerCategory": "2",
+  "BusinessPartnerGrouping": "BP01", 
+  "OrganizationBPName1": "ABC Corporation",
+  "BusinessPartnerIsBlocked": false
+}</div>
+                            
+                            <h4>📋 Example: Add Customer Role</h4>
+                            <div class="json-code">{
+  "BusinessPartner": "1000012345",
+  "BusinessPartnerRole": "FLCU00"
+}</div>
+                            
+                            <h4>📋 Example: Add Business Address</h4>
+                            <div class="json-code">{
+  "BusinessPartner": "1000012345",
+  "Country": "US",
+  "PostalCode": "12345",
+  "CityName": "Business City",
+  "StreetName": "Main Street", 
+  "HouseNumber": "123"
+}</div>
+                            
+                            <p><strong>Integration Flow:</strong> Upon final approval → Create BP → Add FLCU00/FLCU01 roles → Add address → Update application status</p>
+                        </div>
+
+                        <div class="doc-section">
                             <h3>📈 Statistics Dashboard</h3>
                             <p><strong>Real-time Metrics:</strong></p>
                             <ul>
@@ -3326,6 +3378,11 @@
                                 <span class="workflow-step-number">4</span>
                                 <strong>Documents:</strong> Access to all uploaded documents with direct download links
                             </div>
+                            
+                            <div class="workflow-step">
+                                <span class="workflow-step-number">5</span>
+                                <strong>SAP Integration:</strong> Approved applications trigger automated Business Partner creation in SAP S/4HANA with customer roles and addresses
+                            </div>
                         </div>
 
                         <div class="doc-section">
@@ -3340,6 +3397,25 @@
                                 <span class="api-method get">GET</span> /transactions
                                 <p>Gets transaction history for timeline building</p>
                             </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /sap/create-business-partner
+                                <p>Triggers SAP Business Partner creation for approved applications</p>
+                            </div>
+                            
+                            <h4>SAP Business Partner Creation Response:</h4>
+                            <div class="json-code">{
+  "success": true,
+  "sap_business_partner_id": "1000012345",
+  "workflow_id": "wf_a1b2c3d4",
+  "steps_completed": [
+    "Business Partner Created",
+    "Customer Role FLCU00 Added", 
+    "Customer Role FLCU01 Added",
+    "Primary Address Added"
+  ],
+  "sap_integration_status": "COMPLETED"
+}</div>
 
                             <h4>Applications Response:</h4>
                             <div class="json-code">{
@@ -3362,6 +3438,8 @@
         "/uploads/license_123.pdf",
         "/uploads/certificate_456.pdf"
       ],
+      "sap_business_partner_id": "1000012345",
+      "sap_integration_status": "COMPLETED",
       "file_names": [
         "business_license.pdf",
         "tax_certificate.pdf"
