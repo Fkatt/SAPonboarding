@@ -3799,9 +3799,12 @@
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 const notifications = await response.json();
+                console.log('Fetched notifications:', notifications);
+                console.log('Notifications array length:', notifications.length);
                 
                 // Ensure notifications is an array
                 if (Array.isArray(notifications)) {
+                    console.log('Calling displayNotifications with', notifications.length, 'notifications');
                     displayNotifications(notifications);
                 } else {
                     console.error('Notifications response is not an array:', notifications);
@@ -3814,7 +3817,9 @@
         }
 
         function displayNotifications(notifications) {
+            console.log('displayNotifications called with:', notifications.length, 'notifications');
             const listElement = document.getElementById('notification-list');
+            console.log('notification-list element found:', !!listElement);
             
             if (notifications.length === 0) {
                 listElement.innerHTML = `
@@ -3829,7 +3834,8 @@
                 return;
             }
 
-            listElement.innerHTML = notifications.map(notification => `
+            console.log('About to set innerHTML with', notifications.length, 'notifications');
+            const htmlContent = notifications.map(notification => `
                 <div class="notification-item ${notification.type.toLowerCase()} ${!notification.read ? 'unread' : ''}" 
                      onclick="expandNotification('${notification.id}')">
                     <div class="notification-main">
@@ -3846,6 +3852,10 @@
                     ` : ''}
                 </div>
             `).join('');
+            
+            console.log('Generated HTML length:', htmlContent.length);
+            listElement.innerHTML = htmlContent;
+            console.log('innerHTML set, listElement children count:', listElement.children.length);
         }
 
         async function expandNotification(notificationId) {
