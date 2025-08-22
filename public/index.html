@@ -2180,7 +2180,7 @@
                             <select id="filter-status" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white" onchange="filterApplications()">
                                 <option value="">All</option>
                                 <option value="RUNNING">Running</option>
-                                <option value="APPROVED">Approved</option>
+                                <option value="APPROVED" selected>Approved</option>
                                 <option value="REJECTED">Rejected</option>
                             </select>
                         </div>
@@ -2713,6 +2713,10 @@
                 if (result.success) {
                     displayApplications(result.applications);
                     updateApplicationStats(result.applications);
+                    // Apply default filter after applications are loaded
+                    setTimeout(() => {
+                        filterApplications();
+                    }, 100);
                 } else {
                     throw new Error(result.error);
                 }
@@ -3378,7 +3382,15 @@
         }, 60000); // Every 60 seconds
 
         // Application Details Modal Functions
+        let modalInProgress = false;
         async function showApplicationDetails(workflowId) {
+            // Prevent multiple calls
+            if (modalInProgress) {
+                console.log('Modal already in progress, ignoring call');
+                return;
+            }
+            modalInProgress = true;
+            
             console.log('showApplicationDetails called with:', workflowId);
             try {
                 // Fetch detailed application data, transactions, and workflow status with approvers
@@ -3416,6 +3428,8 @@
             } catch (error) {
                 console.error('Error loading application details:', error);
                 alert('Error loading application details: ' + error.message);
+            } finally {
+                modalInProgress = false;
             }
         }
 
@@ -3573,25 +3587,23 @@
                 return;
             }
             
-            // First show the overlay
+            // Show overlay
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
             
-            // Force a reflow to ensure the display change takes effect
-            overlay.offsetHeight;
+            // Show modal with the custom CSS class
+            modal.classList.add('open');
             
-            // Then make modal visible and animate in
-            setTimeout(() => {
-                modal.classList.remove('opacity-0', 'scale-95');
-                modal.classList.add('opacity-100', 'scale-100');
-                
-                console.log('Modal should be visible now. Classes:', {
-                    overlayClasses: overlay.className,
-                    modalClasses: modal.className,
-                    overlayDisplay: window.getComputedStyle(overlay).display,
-                    modalOpacity: window.getComputedStyle(modal).opacity
-                });
-            }, 10);
+            console.log('Modal should be visible now. Classes:', {
+                overlayClasses: overlay.className,
+                modalClasses: modal.className,
+                overlayDisplay: window.getComputedStyle(overlay).display,
+                modalVisibility: window.getComputedStyle(modal).visibility,
+                modalOpacity: window.getComputedStyle(modal).opacity
+            });
+            
+            // Reset the progress flag since modal is now open
+            modalInProgress = false;
         }
 
         function getApprovalTimeline(workflowId, status, transactions, workflowStatus = null) {
@@ -3686,9 +3698,8 @@
             
             console.log('Closing modal...');
             
-            // Add closing animation
-            modal.classList.add('opacity-0', 'scale-95');
-            modal.classList.remove('opacity-100', 'scale-100');
+            // Hide modal using custom CSS class
+            modal.classList.remove('open');
             
             setTimeout(() => {
                 overlay.classList.add('hidden');
