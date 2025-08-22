@@ -1805,11 +1805,7 @@
     <aside class="w-64 bg-gray-800 flex-shrink-0 p-4 border-r border-gray-200 flex flex-col">
         <!-- Logo -->
         <div class="flex items-center gap-3 p-4 mb-8">
-            <img src="NEWUI/FlowBenchlogo.png" alt="FlowBench Logo" class="h-10 w-10">
-            <div>
-                <h1 class="text-xl font-bold text-white">Flowbench</h1>
-                <p class="text-xs text-gray-300">by Orkes</p>
-            </div>
+            <img src="FlowBenchlogo.png" alt="Logo" class="h-10 w-10" onerror="this.style.display='none'">
         </div>
 
         <!-- Navigation -->
@@ -1842,22 +1838,7 @@
         </nav>
         
         <div class="mt-auto">
-            <footer class="text-center py-4">
-                <div class="flex flex-col items-center">
-                    <p class="text-sm font-medium text-gray-400 mb-4">Powered By:</p>
-                    <div class="flex items-center space-x-6">
-                        <a href="https://nodejs.org/" target="_blank" class="tech-icon">
-                            <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/nodejs-logo-2.2e4de51dd534.svg" alt="Node.js Logo" class="h-8" title="Node.js">
-                        </a>
-                        <a href="https://expressjs.com/" target="_blank" class="tech-icon">
-                            <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/express-logo.33793bb59f33.svg" alt="Express.js Logo" class="h-7" title="Express.js">
-                        </a>
-                        <a href="https://github.com/expressjs/multer" target="_blank" class="tech-icon">
-                            <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/multer-logo.324BC15A6321.svg" alt="Multer Logo" class="h-8" title="Multer">
-                        </a>
-                    </div>
-                </div>
-            </footer>
+            <!-- Bottom right powered by footer -->
         </div>
     </aside>
 
@@ -1907,6 +1888,27 @@
 
             <!-- Tab Content -->
             <main>
+            
+            <!-- Powered By Footer - Bottom Right -->
+            <div class="fixed bottom-4 right-4 z-40">
+                <div class="flex items-center gap-3 bg-white rounded-lg shadow-lg p-3 border">
+                    <span class="text-sm font-medium text-blue-600">Powered by</span>
+                    <div class="flex items-center space-x-3">
+                        <a href="https://nodejs.org/" target="_blank" class="tech-icon">
+                            <img src="nodejs.png" alt="Node.js" class="h-6 w-6" title="Node.js" onerror="this.style.display='none'">
+                        </a>
+                        <a href="https://expressjs.com/" target="_blank" class="tech-icon">
+                            <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/express-logo.33793bb59f33.svg" alt="Express.js" class="h-5" title="Express.js">
+                        </a>
+                        <a href="https://github.com/expressjs/multer" target="_blank" class="tech-icon">
+                            <img src="mutler.png" alt="Multer" class="h-6 w-6" title="Multer" onerror="this.style.display='none'">
+                        </a>
+                        <a href="https://orkes.io/" target="_blank" class="tech-icon">
+                            <img src="https://orkes.io/static/logo-orkes-color.svg" alt="Orkes" class="h-6 w-6" title="Orkes">
+                        </a>
+                    </div>
+                </div>
+            </div>
 
         <!-- Submit Application Tab -->
         <div id="submit-tab" class="tab-content active">
@@ -2521,8 +2523,8 @@
                 ).join(', ');
 
                 // Use formData first, then app properties as fallback
-                const businessName = formData.business_name || app.businessName || 'Unknown Business';
-                const applicantEmail = formData.applicant_email || app.applicantEmail || 'Unknown Applicant';
+                const businessName = app.businessName || formData.business_name || 'Unknown Business';
+                const applicantEmail = app.applicantEmail || formData.applicant_email || 'Unknown Applicant';
 
                 html += `
                     <div class="approver-card">
@@ -3377,16 +3379,16 @@
             title.textContent = `${departmentNames[approverId]} - Review Applications`;
             
             const applicationsHtml = applications.map(app => {
-                const formData = app.form_data || {};
+                const formData = app.formData || app.form_data || {};
                 return `
                     <div class="application-review-card" id="review-card-${app.workflowId}">
-                        <h3>${app.business_name || 'Unknown Business'}</h3>
+                        <h3>${app.businessName || app.business_name || 'Unknown Business'}</h3>
                         <div class="application-summary">
-                            <p><strong>Applicant:</strong> ${app.applicant_email}</p>
+                            <p><strong>Applicant:</strong> ${app.applicantEmail || app.applicant_email || 'undefined'}</p>
                             <p><strong>Business License:</strong> ${formData.business_license_id || 'Not provided'}</p>
                             <p><strong>Contact:</strong> ${formData.business_contact_number || 'Not provided'}</p>
                             <p><strong>Address:</strong> ${formData.address || 'Not provided'}</p>
-                            <p><strong>Submitted:</strong> ${new Date(app.createdAt).toLocaleDateString()}</p>
+                            <p><strong>Submitted:</strong> ${new Date(app.createdAt || app.created_at).toLocaleDateString()}</p>
                         </div>
                         <div class="review-actions">
                             <button class="approve-btn" onclick="submitApproverDecision('${app.workflowId}', '${approverId}', 'APPROVED', '')">
