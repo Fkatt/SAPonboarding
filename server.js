@@ -173,11 +173,29 @@ async function createDynamicEnvironment(formData, workflowId, baseUrl) {
         
         // Update or add form data variables
         const formVariables = [
+            // Original fields
             { key: 'contact_email', value: formData.applicant_email },
             { key: 'business_name', value: formData.business_name },
             { key: 'business_contact_number', value: formData.business_contact_number || '' },
             { key: 'address', value: formData.address || '' },
             { key: 'business_license_id', value: formData.business_license_id || '' },
+            
+            // New vendor qualification fields
+            { key: 'company_size', value: formData.company_size || '' },
+            { key: 'years_in_business', value: formData.years_in_business || '' },
+            { key: 'annual_revenue', value: formData.annual_revenue || '' },
+            { key: 'business_type', value: formData.business_type || '' },
+            { key: 'primary_services', value: formData.primary_services || '' },
+            { key: 'preferred_payment_terms', value: formData.preferred_payment_terms || '' },
+            { key: 'credit_references', value: formData.credit_references || '' },
+            { key: 'insurance_coverage', value: formData.insurance_coverage || '' },
+            { key: 'sustainability_initiatives', value: formData.sustainability_initiatives || '' },
+            
+            // Certification arrays (converted to comma-separated strings for Newman)
+            { key: 'certifications', value: Array.isArray(formData.certifications) ? formData.certifications.join(', ') : (formData.certifications || '') },
+            { key: 'security_standards', value: Array.isArray(formData.security_standards) ? formData.security_standards.join(', ') : (formData.security_standards || '') },
+            
+            // Workflow configuration
             { key: 'approver1_email', value: 'finance@sapco.com' },
             { key: 'approver2_email', value: 'legal@sapco.com' },
             { key: 'approver3_email', value: 'procurement@sapco.com' },

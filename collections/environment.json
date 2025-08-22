@@ -83,6 +83,116 @@
 			"enabled": true
 		},
 		{
+			"key": "company_size",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Company size category (startup, small, medium, large, enterprise)",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "years_in_business",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Years the business has been operating",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "annual_revenue",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Annual revenue range of the business",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "business_type",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Type of business (manufacturer, distributor, service provider, etc.)",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "primary_services",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Description of primary products or services offered",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "preferred_payment_terms",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Preferred payment terms (Net 15/30/45/60 days)",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "credit_references",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Whether credit references are available (yes/no)",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "insurance_coverage",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Insurance coverage level (1m, 2m, 5m, 10m+)",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "sustainability_initiatives",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Level of sustainability commitment (high, medium, low)",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "certifications",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Comma-separated list of quality certifications (ISO 9001, ISO 14001, etc.)",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "security_standards",
+			"value": "",
+			"type": "default",
+			"description": {
+				"content": "Comma-separated list of security standards (GDPR, HIPAA, PCI-DSS)",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
 			"key": "compliance_document_url_1",
 			"value": "",
 			"type": "default",
