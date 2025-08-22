@@ -1109,19 +1109,29 @@
         }
 
         async function showApplicationDetails(workflowId) {
+            console.log('showApplicationDetails called with workflowId:', workflowId);
             try {
                 // Fetch application details from server
+                console.log('Attempting to fetch from /application/' + workflowId);
                 const response = await fetch(`/application/${workflowId}`);
+                console.log('Response status:', response.status, response.ok);
+                
                 if (!response.ok) {
+                    console.log('Specific endpoint failed, trying applications list');
                     // If specific endpoint doesn't exist, try to find it in applications list
                     const appsResponse = await fetch('/applications');
                     const appsResult = await appsResponse.json();
+                    console.log('Applications list result:', appsResult);
+                    
                     if (appsResult.success) {
                         const app = appsResult.applications.find(a => a.workflow_id === workflowId);
+                        console.log('Found application:', app);
+                        
                         if (app) {
                             displayApplicationDetailModal(app);
                             openModal('application-modal');
                         } else {
+                            console.error('Application not found in list for workflowId:', workflowId);
                             showCustomAlert('Error', 'Application not found', 'error');
                         }
                     }
@@ -1129,10 +1139,13 @@
                 }
                 
                 const result = await response.json();
+                console.log('Direct endpoint result:', result);
+                
                 if (result.success && result.application) {
                     displayApplicationDetailModal(result.application);
                     openModal('application-modal');
                 } else {
+                    console.error('Failed to load application details:', result);
                     showCustomAlert('Error', 'Failed to load application details', 'error');
                 }
             } catch (error) {
