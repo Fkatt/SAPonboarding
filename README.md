@@ -175,11 +175,24 @@ The system maps 16 form fields to Newman variables:
     "application_data": {
       "business_name": "{{business_name}}",
       "contact_email": "{{contact_email}}",
-      // ... all 16 form fields
+      "business_contact_number": "{{business_contact_number}}",
+      "address": "{{address}}",
+      "business_license_id": "{{business_license_id}}",
+      "company_size": "{{company_size}}",
+      "years_in_business": "{{years_in_business}}",
+      "annual_revenue": "{{annual_revenue}}",
+      "business_type": "{{business_type}}",
+      "primary_services": "{{primary_services}}",
+      "preferred_payment_terms": "{{preferred_payment_terms}}",
+      "credit_references": "{{credit_references}}",
+      "insurance_coverage": "{{insurance_coverage}}",
+      "sustainability_initiatives": "{{sustainability_initiatives}}",
+      "certifications": "{{certifications}}",
+      "security_standards": "{{security_standards}}"
     },
     "approver_emails": {
       "finance": "finance@sapco.com",
-      "legal": "legal@sapco.com", 
+      "legal": "legal@sapco.com",
       "procurement": "procurement@sapco.com"
     }
   }
@@ -235,13 +248,17 @@ The system uses webhooks to receive real-time updates from Orkes workflows.
 ```json
 {
   "workflowId": "workflow-uuid-here",
-  "taskId": "task-uuid-here", 
+  "taskId": "task-uuid-here",
   "status": "COMPLETED|FAILED|IN_PROGRESS",
   "department": "finance|legal|procurement",
   "approverEmail": "approver@sapco.com",
   "timestamp": "2025-08-22T10:30:00Z",
   "applicationData": {
-    // Original form submission data
+    "business_name": "Company Name",
+    "contact_email": "contact@company.com",
+    "business_contact_number": "+1234567890",
+    "address": "123 Business St, City, State",
+    "business_license_id": "BL123456"
   }
 }
 ```
@@ -318,7 +335,20 @@ data/
   "formData": {
     "business_name": "Company Name",
     "contact_email": "contact@company.com",
-    // ... all 16 fields
+    "business_contact_number": "+1234567890",
+    "address": "123 Business St, City, State",
+    "business_license_id": "BL123456",
+    "company_size": "medium",
+    "years_in_business": "5",
+    "annual_revenue": "$1M-$5M",
+    "business_type": "manufacturer",
+    "primary_services": "Manufacturing widgets",
+    "preferred_payment_terms": "Net 30",
+    "credit_references": "yes",
+    "insurance_coverage": "2m",
+    "sustainability_initiatives": "high",
+    "certifications": "ISO 9001, ISO 14001",
+    "security_standards": "GDPR, PCI-DSS"
   }
 }
 ```
@@ -451,53 +481,168 @@ data/
 
 ### HTML Structure
 ```html
-<!-- Header (Lines 2040-2100) -->
-<header>
-  <!-- Logo, Navigation, Notifications, Admin Cog -->
-</header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags, CSS, and Tailwind -->
+</head>
+<body>
+    <!-- Sidebar Navigation (Lines 1940-2055) -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="NEWUI/mutler.png" alt="SAP Onboarding" />
+        </div>
+        <nav>
+            <button data-tab="apply">Submit Application</button>
+            <button data-tab="track">Track Application</button>
+            <button data-tab="approvers">Approvers</button>
+            <button data-tab="manage">Business Partners</button>
+            <button data-tab="transactions">Transactions</button>
+        </nav>
+    </aside>
 
-<!-- Tab Navigation (Lines 2100-2120) --> 
-<nav>
-  <!-- Apply, Track, Approvers, Manage tabs -->
-</nav>
+    <!-- Main Content Area (Lines 2058-2600) -->
+    <div class="flex-1 main-container">
+        <div class="container">
+            <!-- Header with Notifications and Admin Cog (Lines 2061-2080) -->
+            <header class="header">
+                <div>
+                    <h1 id="page-title">Submit New Application</h1>
+                    <p id="page-subtitle">Fill out the form...</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="notification-bell" onclick="toggleNotificationPanel()">
+                        <svg><!-- Bell icon --></svg>
+                        <span class="notification-badge" id="notification-badge">0</span>
+                    </div>
+                    <div class="admin-cog" onclick="toggleAdminPanel()">
+                        <svg><!-- Cog icon --></svg>
+                    </div>
+                </div>
+            </header>
 
-<!-- Application Form (Lines 2120-2300) -->
-<section id="apply-tab">
-  <!-- 16 form fields with validation -->
-</section>
+            <!-- Tab Content Areas -->
+            
+            <!-- Application Form Tab (Lines 2700-2900) -->
+            <div id="apply-tab" class="tab-content">
+                <form id="application-form">
+                    <!-- 16 form fields: business info, contact, enhanced vendor fields -->
+                    <input name="business_name" />
+                    <input name="contact_email" />
+                    <input name="company_size" />
+                    <!-- ... all 16 fields ... -->
+                    <button type="submit">Submit Application</button>
+                </form>
+            </div>
 
-<!-- Tracking Interface (Lines 2300-2400) -->
-<section id="track-tab">
-  <!-- Application status lookup -->
-</section>
+            <!-- Tracking Tab (Lines 2900-3000) -->
+            <div id="track-tab" class="tab-content">
+                <input type="text" id="tracking-id" placeholder="Enter workflow ID" />
+                <button onclick="trackApplication()">Track Status</button>
+                <div id="tracking-results"></div>
+            </div>
 
-<!-- Approver Dashboard (Lines 2400-2600) -->
-<section id="approvers-tab">
-  <!-- Email-style inbox interface -->
-  <!-- Department tabs: Finance, Legal, Procurement -->
-  <!-- Split-panel: application list + details -->
-</section>
+            <!-- Approvers Tab - Email Inbox Interface (Lines 3000-3400) -->
+            <div id="approvers-tab" class="tab-content">
+                <div class="approver-header">
+                    <div class="dept-tabs">
+                        <button onclick="switchDepartment('finance')">Finance</button>
+                        <button onclick="switchDepartment('legal')">Legal</button>
+                        <button onclick="switchDepartment('procurement')">Procurement</button>
+                    </div>
+                </div>
+                <div class="inbox-container">
+                    <div class="inbox-list" id="inbox-list">
+                        <!-- Application list items -->
+                    </div>
+                    <div class="inbox-details" id="inbox-details">
+                        <!-- Selected application details -->
+                    </div>
+                </div>
+            </div>
 
-<!-- Business Partner Management (Lines 2600-2800) -->
-<section id="manage-tab">
-  <!-- Application management interface -->
-</section>
+            <!-- Business Partners Management Tab (Lines 3400-3600) -->
+            <div id="manage-tab" class="tab-content">
+                <div id="manage-applications">
+                    <!-- Application management table -->
+                </div>
+            </div>
 
-<!-- Notification Panel (Lines 2050-2090) -->
-<aside id="notification-panel">
-  <!-- Bell dropdown with notifications -->
-</aside>
+            <!-- Transactions Tab (Lines 3600-3700) -->
+            <div id="transactions-tab" class="tab-content">
+                <div id="transaction-list">
+                    <!-- Transaction history -->
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Admin Panel (Lines 2090-2190) -->
-<aside id="admin-panel">
-  <!-- Login screen + admin interface -->
-  <!-- Navigation sidebar + content area -->
-</aside>
+    <!-- Notification Panel Overlay (Lines 2083-2092) -->
+    <div class="notification-overlay" id="notification-overlay"></div>
+    <div class="notification-panel" id="notification-panel">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button onclick="closeNotificationPanel()">×</button>
+        </div>
+        <div class="notification-list" id="notification-list">
+            <!-- Notification items -->
+        </div>
+    </div>
 
-<!-- Application Details Modal (Lines 2190-2200) -->
-<div id="application-modal">
-  <!-- Detailed application view -->
-</div>
+    <!-- Admin Panel (Lines 2095-2190) -->
+    <div class="admin-overlay" id="admin-overlay"></div>
+    <div class="admin-panel" id="admin-panel">
+        <!-- Login Screen -->
+        <div id="admin-login">
+            <form>
+                <input id="admin-username" placeholder="admin" />
+                <input id="admin-password" type="password" placeholder="admin123" />
+                <input id="admin-auth-enabled" type="checkbox" checked />
+                <button onclick="adminLogin()">Access Admin Panel</button>
+            </form>
+        </div>
+        
+        <!-- Admin Content -->
+        <div id="admin-content" class="hidden">
+            <header class="admin-header">
+                <h1>System Administration</h1>
+                <button onclick="closeAdminPanel()">×</button>
+            </header>
+            <div class="flex">
+                <nav class="admin-nav">
+                    <a data-section="overview">System Overview</a>
+                    <a data-section="webhooks">Webhook Monitor</a>
+                    <a data-section="newman">Newman Inspector</a>
+                    <a data-section="api-builder">API Call Builder</a>
+                    <a data-section="assets">Assets Manager</a>
+                    <a data-section="documentation">Documentation</a>
+                </nav>
+                <div class="admin-content-area" id="admin-content-area">
+                    <!-- Admin section content loads here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Details Modal (Lines 2192-2202) -->
+    <div class="modal-overlay" id="application-modal-overlay">
+        <div class="application-modal" id="application-modal">
+            <div class="modal-header">
+                <h2>Application Details</h2>
+                <button onclick="closeApplicationModal()">×</button>
+            </div>
+            <div class="modal-content" id="application-modal-content">
+                <!-- Application details populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript (Lines 800-4500) -->
+    <script>
+        // All application JavaScript functions
+    </script>
+</body>
+</html>
 ```
 
 ---
