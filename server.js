@@ -157,30 +157,67 @@ async function createDynamicEnvironment(formData, workflowId, baseUrl) {
         const baseEnvPath = path.join(__dirname, 'collections', 'environment.json');
         const baseEnv = await fs.readJson(baseEnvPath);
         
-        // Create dynamic environment with form data
+        // Create dynamic environment with form data - update existing values instead of duplicating
+        const formDataMap = new Map([
+            ['contact_email', formData.applicant_email],
+            ['business_name', formData.business_name],
+            ['business_contact_number', formData.business_contact_number || ''],
+            ['address', formData.address || ''],
+            ['business_license_id', formData.business_license_id || ''],
+            ['approver1_email', 'finance@sapco.com'],
+            ['approver2_email', 'legal@sapco.com'],
+            ['approver3_email', 'procurement@sapco.com'],
+            ['workflow_id', workflowId]
+        ]);
+        
+        // Update existing environment values and add new ones if they don't exist
+        const updatedValues = baseEnv.values.map(envVar => {
+            if (formDataMap.has(envVar.key)) {
+                return {
+                    ...envVar,
+                    value: formDataMap.get(envVar.key)
+                };
+            }
+            return envVar;
+        });
+        
+        // Add any new keys that don't exist in base environment
+        const existingKeys = new Set(baseEnv.values.map(v => v.key));
+        formDataMap.forEach((value, key) => {
+            if (!existingKeys.has(key)) {
+                updatedValues.push({
+                    key,
+                    value,
+                    type: 'default',
+                    enabled: true
+                });
+            }
+        });
+        
         const dynamicEnv = {
             ...baseEnv,
-            values: [
-                ...baseEnv.values,
-                { key: 'contact_email', value: formData.applicant_email },
-                { key: 'business_name', value: formData.business_name },
-                { key: 'business_contact_number', value: formData.business_contact_number || '' },
-                { key: 'address', value: formData.address || '' },
-                { key: 'business_license_id', value: formData.business_license_id || '' },
-                { key: 'approver1_email', value: 'finance@sapco.com' },
-                { key: 'approver2_email', value: 'legal@sapco.com' },
-                { key: 'approver3_email', value: 'procurement@sapco.com' },
-                { key: 'workflow_id', value: workflowId }
-            ]
+            values: updatedValues
         };
         
-        // Add file URLs to environment
+        // Add file URLs to environment - update existing values instead of duplicating
         if (formData.uploadedFiles && formData.uploadedFiles.length > 0) {
             formData.uploadedFiles.forEach((file, index) => {
-                dynamicEnv.values.push({
-                    key: `compliance_document_url_${index + 1}`,
-                    value: `${baseUrl}${file.publicUrl}`
-                });
+                const fileUrlKey = `compliance_document_url_${index + 1}`;
+                const fileUrl = `${baseUrl}${file.publicUrl}`;
+                
+                // Find existing compliance document URL entry and update it
+                const existingFileEntry = dynamicEnv.values.find(v => v.key === fileUrlKey);
+                if (existingFileEntry) {
+                    existingFileEntry.value = fileUrl;
+                } else {
+                    // Add new file URL if it doesn't exist
+                    dynamicEnv.values.push({
+                        key: fileUrlKey,
+                        value: fileUrl,
+                        type: 'default',
+                        enabled: true
+                    });
+                }
             });
         }
         
