@@ -14,9 +14,10 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            color: #333;
+            font-family: 'Inter', sans-serif;
+            background-color: #F9FAFB;
+            color: #1F2937;
+            overflow-x: hidden;
             line-height: 1.6;
         }
 
@@ -1728,49 +1729,183 @@
             gap: 1rem;
             align-items: end;
         }
+
+        /* New Modern Navigation Styles */
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            color: #D1D5DB;
+        }
+        .nav-link.active {
+            background-color: #374151;
+            color: #FFFFFF;
+            border-right: 3px solid #3B82F6;
+        }
+        .nav-link:not(.active):hover {
+            background-color: #374151;
+            color: #FFFFFF;
+        }
+
+        .tech-icon {
+            transition: all 0.3s ease-in-out;
+            filter: grayscale(100%);
+            opacity: 0.6;
+        }
+        .tech-icon:hover {
+            transform: scale(1.1) translateY(-5px);
+            filter: grayscale(0%);
+            opacity: 1;
+        }
+
+        .tab-content { 
+            display: none; 
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Updated notification panel styles */
+        .notification-panel.open {
+            transform: translateX(0);
+        }
+
+        .notification-overlay.open {
+            display: block !important;
+        }
+
+        /* Card styles */
+        .card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+        }
+
+        .main-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle at 25% 25%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
+                              radial-gradient(circle at 75% 75%, rgba(56, 189, 248, 0.04) 0%, transparent 40%);
+            opacity: 0.8;
+            z-index: 0;
+            pointer-events: none;
+        }
         </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="notification-bell" onclick="toggleNotificationPanel()">
-                🔔
-                <span class="notification-badge" id="notification-badge">0</span>
-            </div>
-            <h1>SAP Vendor Onboarding System</h1>
-            <p>Streamlined vendor application processing with Orkes workflow integration</p>
-        </div>
+<body class="flex min-h-screen bg-gray-50">
 
-        <!-- Notification Panel -->
-        <div class="notification-overlay" id="notification-overlay" onclick="closeNotificationPanel()"></div>
-        <div class="notification-panel" id="notification-panel">
-            <div class="notification-header">
-                <h3>Notifications</h3>
-                <button class="notification-close" onclick="closeNotificationPanel()">×</button>
-            </div>
-            <div class="notification-list" id="notification-list">
-                <div class="notification-empty">No notifications yet</div>
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 flex-shrink-0 p-4 border-r border-gray-200 flex flex-col">
+        <!-- Logo -->
+        <div class="flex items-center gap-3 p-4 mb-8">
+            <img src="NEWUI/FlowBenchlogo.png" alt="FlowBench Logo" class="h-10 w-10">
+            <div>
+                <h1 class="text-xl font-bold text-white">Flowbench</h1>
+                <p class="text-xs text-gray-300">by Orkes</p>
             </div>
         </div>
 
-        <!-- Application Details Modal -->
-        <div class="modal-overlay" id="application-modal-overlay" onclick="closeApplicationModal()"></div>
-        <div class="application-modal" id="application-modal">
-            <div class="modal-header">
-                <h2>Application Details</h2>
-                <button class="modal-close" onclick="closeApplicationModal()">×</button>
-            </div>
-            <div class="modal-content" id="application-modal-content">
-                <!-- Application details will be populated here -->
-            </div>
+        <!-- Navigation -->
+        <nav class="flex flex-col space-y-2">
+            <button class="nav-link tab flex items-center gap-3 py-3 px-4 rounded-lg text-white hover:bg-gray-700" data-tab="submit" onclick="switchTab('submit', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-medium">Submit New</span>
+            </button>
+            <button class="nav-link tab flex items-center gap-3 py-3 px-4 rounded-lg text-white hover:bg-gray-700" data-tab="approvers" onclick="switchTab('approvers', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-3-5.197m0 0A4 4 0 1112 4.354m0 5.292a4 4 0 110-5.292" />
+                </svg>
+                <span class="font-medium">Approvers</span>
+            </button>
+            <button class="nav-link tab active flex items-center gap-3 py-3 px-4 rounded-lg text-white bg-gray-700 border-r-3 border-blue-500" data-tab="applications" onclick="switchTab('applications', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                    <polyline points="13 2 13 9 20 9"></polyline>
+                </svg>
+                <span class="font-medium">Business Partners</span>
+            </button>
+            <button class="nav-link tab flex items-center gap-3 py-3 px-4 rounded-lg text-white hover:bg-gray-700" data-tab="transactions" onclick="switchTab('transactions', this)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <span class="font-medium">Transactions</span>
+            </button>
+        </nav>
+        
+        <div class="mt-auto">
+            <footer class="text-center py-4">
+                <div class="flex flex-col items-center">
+                    <p class="text-sm font-medium text-gray-400 mb-4">Powered By:</p>
+                    <div class="flex items-center space-x-6">
+                        <a href="https://nodejs.org/" target="_blank" class="tech-icon">
+                            <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/nodejs-logo-2.2e4de51dd534.svg" alt="Node.js Logo" class="h-8" title="Node.js">
+                        </a>
+                        <a href="https://expressjs.com/" target="_blank" class="tech-icon">
+                            <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/express-logo.33793bb59f33.svg" alt="Express.js Logo" class="h-7" title="Express.js">
+                        </a>
+                        <a href="https://github.com/expressjs/multer" target="_blank" class="tech-icon">
+                            <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/multer-logo.324BC15A6321.svg" alt="Multer Logo" class="h-8" title="Multer">
+                        </a>
+                    </div>
+                </div>
+            </footer>
         </div>
+    </aside>
 
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('submit')">Submit Application</div>
-            <div class="tab" onclick="switchTab('approvers')">Approvers</div>
-            <div class="tab" onclick="switchTab('applications')">All Applications</div>
-            <div class="tab" onclick="switchTab('transactions')">Transactions</div>
-        </div>
+    <!-- Main Content -->
+    <div class="flex-1 main-container relative">
+        <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+            <!-- Header -->
+            <header class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 id="page-title" class="text-3xl font-bold text-gray-900">Submit New Application</h1>
+                    <p id="page-subtitle" class="text-gray-500 mt-1">Fill out the form to start the vendor onboarding process.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="notification-bell bg-blue-500 hover:bg-blue-600 transition-colors rounded-full p-2 cursor-pointer" onclick="toggleNotificationPanel()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" id="notification-badge">0</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Notification Panel -->
+            <div class="notification-overlay fixed inset-0 bg-black bg-opacity-50 z-40 hidden" id="notification-overlay" onclick="closeNotificationPanel()"></div>
+            <div class="notification-panel fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-50" id="notification-panel">
+                <div class="notification-header p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Notifications</h3>
+                    <button class="notification-close text-gray-400 hover:text-gray-600" onclick="closeNotificationPanel()">×</button>
+                </div>
+                <div class="notification-list p-4" id="notification-list">
+                    <div class="notification-empty text-gray-500 text-center">No notifications yet</div>
+                </div>
+            </div>
+
+            <!-- Application Details Modal -->
+            <div class="modal-overlay fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4" id="application-modal-overlay" onclick="closeApplicationModal()"></div>
+            <div class="application-modal bg-white w-full max-w-4xl rounded-xl shadow-xl transform opacity-0 scale-95 hidden" id="application-modal">
+                <div class="modal-header p-6 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-gray-900">Application Details</h2>
+                    <button class="modal-close text-gray-400 hover:text-gray-600 text-2xl" onclick="closeApplicationModal()">×</button>
+                </div>
+                <div class="modal-content p-6 max-h-[70vh] overflow-y-auto" id="application-modal-content">
+                    <!-- Application details will be populated here -->
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <main>
 
         <!-- Submit Application Tab -->
         <div id="submit-tab" class="tab-content active">
@@ -2057,14 +2192,30 @@
         let pollingInterval = null;
 
         // Tab switching
-        function switchTab(tabName) {
+        function switchTab(tabName, element) {
             // Remove active class from all tabs and content
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.classList.remove('bg-gray-700', 'border-r-3', 'border-blue-500');
+                tab.classList.add('hover:bg-gray-700');
+            });
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
             // Add active class to selected tab and content
-            event.target.classList.add('active');
+            element.classList.add('active', 'bg-gray-700', 'border-r-3', 'border-blue-500');
+            element.classList.remove('hover:bg-gray-700');
             document.getElementById(tabName + '-tab').classList.add('active');
+
+            // Update page title and subtitle
+            const pageTitles = {
+                submit: { title: "Submit New Application", subtitle: "Fill out the form to start the vendor onboarding process." },
+                approvers: { title: "Approver Dashboard", subtitle: "Review pending vendor applications for your department." },
+                applications: { title: "Manage Business Partners", subtitle: "Search, view, and manage vendor master data." },
+                transactions: { title: "Transaction Log", subtitle: "A detailed log of all workflow events and actions." }
+            };
+
+            document.getElementById('page-title').innerText = pageTitles[tabName].title;
+            document.getElementById('page-subtitle').innerText = pageTitles[tabName].subtitle;
 
             // Load data for specific tabs
             switch(tabName) {
@@ -2768,6 +2919,11 @@
             
             panel.classList.add('open');
             overlay.classList.add('open');
+            
+            // Clear the notification badge when opened
+            const badge = document.getElementById('notification-badge');
+            badge.textContent = '0';
+            badge.style.display = 'none';
             
             // Load notifications when panel opens
             loadNotifications();
