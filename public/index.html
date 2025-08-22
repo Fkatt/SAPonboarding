@@ -386,6 +386,79 @@
             font-weight: 600;
         }
 
+        /* Admin Panel Styles */
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #6B7280;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .admin-nav-item:hover {
+            background-color: #F9FAFB;
+            color: #374151;
+        }
+
+        .admin-nav-item.active {
+            background-color: #EBF8FF;
+            color: #1D4ED8;
+            border-left-color: #1D4ED8;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .admin-code-block {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .admin-badge.success {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+
+        .admin-badge.warning {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+
+        .admin-badge.info {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+        }
+
         .btn {
             background: #3498db;
             color: white;
@@ -1997,10 +2070,12 @@
                         </svg>
                         <span class="notification-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-pulse" id="notification-badge" style="display: none;">0</span>
                     </div>
-                    <!-- Test notification button (dev only) -->
-                    <button onclick="createTestNotification()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 text-xs px-2 py-1 rounded opacity-50" title="Create test notification (dev)">
-                        Test
-                    </button>
+                    <div class="admin-cog bg-gray-500 hover:bg-gray-600 transition-all duration-200 rounded-full p-2 cursor-pointer relative hover:scale-105 active:scale-95 hover:rotate-90 transition-transform" onclick="toggleAdminPanel()" title="Admin Panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
                 </div>
             </header>
 
@@ -2013,6 +2088,103 @@
                 </div>
                 <div class="notification-list p-4" id="notification-list">
                     <div class="notification-empty text-gray-500 text-center">No notifications yet</div>
+                </div>
+            </div>
+
+            <!-- Admin Panel -->
+            <div class="admin-overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden opacity-0 transition-opacity duration-300" id="admin-overlay" onclick="closeAdminPanel()"></div>
+            <div class="admin-panel fixed top-0 right-0 h-full w-full max-w-6xl bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-50" id="admin-panel">
+                <!-- Admin Login Screen -->
+                <div id="admin-login" class="h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+                    <div class="bg-white rounded-lg shadow-xl p-8 w-96">
+                        <div class="text-center mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            <h2 class="text-2xl font-bold text-gray-900">Admin Access</h2>
+                            <p class="text-gray-600 text-sm mt-2">Enter your credentials to access the admin panel</p>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                                <input type="text" id="admin-username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="admin">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="admin-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="admin123">
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="admin-auth-enabled" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked>
+                                <label for="admin-auth-enabled" class="ml-2 text-sm text-gray-700">Enable authentication</label>
+                            </div>
+                        </div>
+                        
+                        <button onclick="adminLogin()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                            Access Admin Panel
+                        </button>
+                        
+                        <div id="admin-login-error" class="mt-4 text-red-600 text-sm text-center hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Admin Content -->
+                <div id="admin-content" class="h-full bg-gray-50 hidden">
+                    <!-- Admin Header -->
+                    <div class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">System Administration</h1>
+                            <p class="text-gray-600 text-sm">SAP Vendor Onboarding System</p>
+                        </div>
+                        <button onclick="closeAdminPanel()" class="text-gray-400 hover:text-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Admin Navigation -->
+                    <div class="flex h-full">
+                        <div class="w-64 bg-white border-r border-gray-200">
+                            <nav class="mt-4">
+                                <a href="#" class="admin-nav-item active" data-section="overview" onclick="showAdminSection('overview')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    System Overview
+                                </a>
+                                <a href="#" class="admin-nav-item" data-section="webhooks" onclick="showAdminSection('webhooks')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                    </svg>
+                                    Webhook Monitor
+                                </a>
+                                <a href="#" class="admin-nav-item" data-section="newman" onclick="showAdminSection('newman')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    Newman Inspector
+                                </a>
+                                <a href="#" class="admin-nav-item" data-section="api-builder" onclick="showAdminSection('api-builder')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                    API Call Builder
+                                </a>
+                                <a href="#" class="admin-nav-item" data-section="assets" onclick="showAdminSection('assets')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    Assets Manager
+                                </a>
+                            </nav>
+                        </div>
+                        
+                        <!-- Admin Content Area -->
+                        <div class="flex-1 p-6 overflow-y-auto" id="admin-content-area">
+                            <!-- Content will be loaded here -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2333,7 +2505,7 @@
                                 <div class="ml-auto">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" 
                                           id="finance-badge">
-                                        <span id="pending-count-1">0</span> Pending
+                                        <span id="pending-count-1">0</span>&nbsp;Pending
                                     </span>
                                     <div class="text-xs text-gray-400 mt-1" id="reminder-count-1">0 reminders sent</div>
                                 </div>
@@ -2352,7 +2524,7 @@
                                 <div class="ml-auto">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" 
                                           id="legal-badge">
-                                        <span id="pending-count-2">0</span> Pending
+                                        <span id="pending-count-2">0</span>&nbsp;Pending
                                     </span>
                                     <div class="text-xs text-gray-400 mt-1" id="reminder-count-2">0 reminders sent</div>
                                 </div>
@@ -2371,7 +2543,7 @@
                                 <div class="ml-auto">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" 
                                           id="procurement-badge">
-                                        <span id="pending-count-3">0</span> Pending
+                                        <span id="pending-count-3">0</span>&nbsp;Pending
                                     </span>
                                     <div class="text-xs text-gray-400 mt-1" id="reminder-count-3">0 reminders sent</div>
                                 </div>
@@ -3599,13 +3771,21 @@
             const applicantEmailField = document.getElementById('applicant_email');
             let applicantEmail = applicantEmailField ? applicantEmailField.value : '';
             
-            // If no email in form, use a demo email for testing
+            // If no email in form, show instructions instead of trying demo
             if (!applicantEmail) {
-                applicantEmail = 'demo@example.com';
-                console.log('Using demo email for notification testing:', applicantEmail);
-            } else {
-                console.log('Loading notifications for email:', applicantEmail);
+                document.getElementById('notification-list').innerHTML = `
+                    <div class="notification-empty p-4 text-center text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <h3 class="font-medium text-gray-700 mb-1">No Notifications</h3>
+                        <p class="text-sm">Submit an application to receive status notifications</p>
+                    </div>
+                `;
+                return;
             }
+            
+            console.log('Loading notifications for email:', applicantEmail);
 
             try {
                 const response = await fetch(`/api/notifications/${encodeURIComponent(applicantEmail)}`);
@@ -3631,7 +3811,15 @@
             const listElement = document.getElementById('notification-list');
             
             if (notifications.length === 0) {
-                listElement.innerHTML = '<div class="notification-empty">No notifications yet</div>';
+                listElement.innerHTML = `
+                    <div class="notification-empty p-4 text-center text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 class="font-medium text-gray-700 mb-1">All caught up!</h3>
+                        <p class="text-sm">No notifications for this email address</p>
+                    </div>
+                `;
                 return;
             }
 
@@ -3677,9 +3865,13 @@
             const applicantEmailField = document.getElementById('applicant_email');
             let applicantEmail = applicantEmailField ? applicantEmailField.value : '';
             
-            // Use demo email if no email in form
+            // If no email, hide badge and don't check
             if (!applicantEmail) {
-                applicantEmail = 'demo@example.com';
+                const badge = document.getElementById('notification-badge');
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+                return;
             }
 
             try {
@@ -3724,53 +3916,591 @@
             }, 30000);
         }
 
-        // Test function to create a sample notification (for development)
-        async function createTestNotification() {
-            const applicantEmailField = document.getElementById('applicant_email');
-            let applicantEmail = applicantEmailField ? applicantEmailField.value : '';
-            
-            // Use demo email if no email in form
-            if (!applicantEmail) {
-                applicantEmail = 'demo@example.com';
-            }
-
-            try {
-                const testNotification = {
-                    workflow_id: 'TEST-' + Date.now(),
-                    applicant_email: applicantEmail,
-                    type: 'info',
-                    title: 'Test Notification',
-                    message: 'This is a test notification to verify the notification system is working.',
-                    action_required: false,
-                    department: 'System',
-                    rejection_reason: '',
-                    guidance: 'This is just a test - no action needed.'
-                };
-
-                console.log('Creating test notification:', testNotification);
-                const response = await fetch('/api/notifications', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(testNotification)
-                });
-
-                if (response.ok) {
-                    console.log('Test notification created successfully');
-                    updateNotificationCount();
-                } else {
-                    console.error('Failed to create test notification');
-                }
-            } catch (error) {
-                console.error('Error creating test notification:', error);
-            }
-        }
 
         // Update notification count when email changes
         document.getElementById('applicant_email').addEventListener('input', () => {
             setTimeout(updateNotificationCount, 500); // Debounce
         });
+
+        // Admin Panel Functions
+        let adminAuthenticated = false;
+        const adminCredentials = {
+            username: 'admin',
+            password: 'admin123'
+        };
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            const overlay = document.getElementById('admin-overlay');
+            
+            if (panel.classList.contains('translate-x-0')) {
+                closeAdminPanel();
+            } else {
+                openAdminPanel();
+            }
+        }
+
+        function openAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            const overlay = document.getElementById('admin-overlay');
+            
+            // Show overlay
+            overlay.classList.remove('hidden');
+            overlay.classList.add('opacity-100');
+            
+            // Show panel
+            panel.classList.remove('translate-x-full');
+            panel.classList.add('translate-x-0');
+            
+            // Reset to login screen
+            adminAuthenticated = false;
+            showAdminLogin();
+        }
+
+        function closeAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            const overlay = document.getElementById('admin-overlay');
+            
+            // Hide panel
+            panel.classList.add('translate-x-full');
+            panel.classList.remove('translate-x-0');
+            
+            // Hide overlay after animation
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('opacity-100');
+            }, 300);
+        }
+
+        function showAdminLogin() {
+            document.getElementById('admin-login').classList.remove('hidden');
+            document.getElementById('admin-content').classList.add('hidden');
+        }
+
+        function showAdminContent() {
+            document.getElementById('admin-login').classList.add('hidden');
+            document.getElementById('admin-content').classList.remove('hidden');
+            // Load default section
+            showAdminSection('overview');
+        }
+
+        function adminLogin() {
+            const authEnabled = document.getElementById('admin-auth-enabled').checked;
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            const errorDiv = document.getElementById('admin-login-error');
+            
+            if (!authEnabled) {
+                // Skip authentication
+                adminAuthenticated = true;
+                showAdminContent();
+                return;
+            }
+            
+            // Check credentials
+            if (username === adminCredentials.username && password === adminCredentials.password) {
+                adminAuthenticated = true;
+                errorDiv.classList.add('hidden');
+                showAdminContent();
+            } else {
+                errorDiv.textContent = 'Invalid username or password';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function showAdminSection(section) {
+            // Update navigation
+            document.querySelectorAll('.admin-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+            
+            // Load section content
+            const contentArea = document.getElementById('admin-content-area');
+            
+            switch(section) {
+                case 'overview':
+                    loadSystemOverview();
+                    break;
+                case 'webhooks':
+                    loadWebhookMonitor();
+                    break;
+                case 'newman':
+                    loadNewmanInspector();
+                    break;
+                case 'api-builder':
+                    loadApiCallBuilder();
+                    break;
+                case 'assets':
+                    loadAssetsManager();
+                    break;
+            }
+        }
+
+        function loadSystemOverview() {
+            const contentArea = document.getElementById('admin-content-area');
+            contentArea.innerHTML = `
+                <div class="space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">System Overview</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="admin-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">Current Domain</h3>
+                                    <p class="text-2xl font-bold text-blue-600">${window.location.hostname}</p>
+                                    <p class="text-sm text-gray-500">Port: ${window.location.port || '80'}</p>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0 0V3" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">Newman Status</h3>
+                                    <p class="text-sm text-green-600">Collections Available</p>
+                                    <span class="admin-badge success">Active</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-card">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">Orkes Integration</h3>
+                                    <p class="text-sm text-blue-600">API Connected</p>
+                                    <span class="admin-badge info">Configured</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-card">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">System Configuration</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-2">Environment Files</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                        <span class="text-sm font-mono">collections/environment.json</span>
+                                        <span class="admin-badge success">Active</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                        <span class="text-sm font-mono">collections/orkes-collection.json</span>
+                                        <span class="admin-badge success">Active</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-2">Server Configuration</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                        <span class="text-sm">Base URL</span>
+                                        <span class="text-sm font-mono">${window.location.origin}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                        <span class="text-sm">Protocol</span>
+                                        <span class="text-sm font-mono">${window.location.protocol}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadWebhookMonitor() {
+            const contentArea = document.getElementById('admin-content-area');
+            contentArea.innerHTML = `
+                <div class="space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Webhook Monitor</h2>
+                        <p class="text-gray-600">Monitor webhook configurations and activity</p>
+                    </div>
+                    
+                    <div class="admin-card">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Configured Webhooks</h3>
+                        <div class="space-y-4">
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-medium text-gray-900">Orkes Workflow Status Updates</h4>
+                                    <span class="admin-badge success">Active</span>
+                                </div>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <p><strong>Endpoint:</strong> <code>/webhook/workflow-status</code></p>
+                                    <p><strong>Method:</strong> POST</p>
+                                    <p><strong>Purpose:</strong> Receives workflow completion notifications from Orkes</p>
+                                    <p><strong>File:</strong> <code>server.js:lines 920-1070</code></p>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-medium text-gray-900">Approver Decision Handler</h4>
+                                    <span class="admin-badge success">Active</span>
+                                </div>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <p><strong>Endpoint:</strong> <code>/approver-decision</code></p>
+                                    <p><strong>Method:</strong> POST</p>
+                                    <p><strong>Purpose:</strong> Handles individual approver responses</p>
+                                    <p><strong>File:</strong> <code>server.js:lines 680-760</code></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-card">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Webhook Configuration Guide</h3>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <h4 class="font-medium text-blue-900 mb-2">To modify webhook behavior:</h4>
+                                <ul class="text-sm text-blue-800 space-y-1">
+                                    <li>• <strong>Workflow webhooks:</strong> Edit <code>server.js</code> around line 920-1070</li>
+                                    <li>• <strong>Approver webhooks:</strong> Edit <code>server.js</code> around line 680-760</li>
+                                    <li>• <strong>Add new webhooks:</strong> Add route handlers in <code>server.js</code></li>
+                                    <li>• <strong>Webhook URLs:</strong> Configure in Orkes workflow definitions</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadNewmanInspector() {
+            document.getElementById('admin-content').innerHTML = `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Newman Inspector</h3>
+                        <p class="text-sm text-gray-600 mt-1">View Newman collection variables and environment settings</p>
+                    </div>
+                    <div class="p-6">
+                        <!-- Environment Variables Section -->
+                        <div class="mb-8">
+                            <h4 class="text-md font-semibold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Environment Variables
+                            </h4>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between"><span class="font-medium text-gray-700">Base URL:</span><code class="text-blue-600">https://developer.orkescloud.com</code></div>
+                                        <div class="flex justify-between"><span class="font-medium text-gray-700">API Key:</span><code class="text-green-600">16qp64eb38d9-7e71-11f0-b60b-c227118a1889</code></div>
+                                        <div class="flex justify-between"><span class="font-medium text-gray-700">Secret:</span><code class="text-red-600">vvLG0hYcNx89ev6xKZRzXjfvR8E7reWJUl5bSCBvZuq2XvEP</code></div>
+                                        <div class="flex justify-between"><span class="font-medium text-gray-700">JWT Token:</span><code class="text-gray-500">Dynamic (generated)</code></div>
+                                        <div class="flex justify-between"><span class="font-medium text-gray-700">Workflow ID:</span><code class="text-purple-600">Dynamic (per execution)</code></div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <h5 class="font-medium text-gray-900 mb-2">Form Variables:</h5>
+                                        <div class="text-xs space-y-1 max-h-32 overflow-y-auto">
+                                            <div>• <code>contact_email</code> - Business contact email</div>
+                                            <div>• <code>business_name</code> - Company name</div>
+                                            <div>• <code>business_contact_number</code> - Phone number</div>
+                                            <div>• <code>address</code> - Business address</div>
+                                            <div>• <code>business_license_id</code> - License ID</div>
+                                            <div>• <code>company_size</code> - Company size category</div>
+                                            <div>• <code>years_in_business</code> - Years operating</div>
+                                            <div>• <code>annual_revenue</code> - Revenue range</div>
+                                            <div>• <code>business_type</code> - Business type</div>
+                                            <div>• <code>primary_services</code> - Services offered</div>
+                                            <div>• <code>preferred_payment_terms</code> - Payment terms</div>
+                                            <div>• <code>credit_references</code> - Credit ref availability</div>
+                                            <div>• <code>insurance_coverage</code> - Insurance level</div>
+                                            <div>• <code>sustainability_initiatives</code> - Sustainability level</div>
+                                            <div>• <code>certifications</code> - Quality certifications</div>
+                                            <div>• <code>security_standards</code> - Security standards</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Approver Variables Section -->
+                        <div class="mb-8">
+                            <h4 class="text-md font-semibold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Approver Configuration
+                            </h4>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <div class="font-medium text-gray-900 mb-2">Finance Approver</div>
+                                        <div class="space-y-1">
+                                            <div>Email: <code class="text-blue-600">finance@sapco.com</code></div>
+                                            <div>Task ID: <code class="text-gray-500">Dynamic</code></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-gray-900 mb-2">Legal Approver</div>
+                                        <div class="space-y-1">
+                                            <div>Email: <code class="text-blue-600">legal@sapco.com</code></div>
+                                            <div>Task ID: <code class="text-gray-500">Dynamic</code></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-gray-900 mb-2">Procurement Approver</div>
+                                        <div class="space-y-1">
+                                            <div>Email: <code class="text-blue-600">procurement@sapco.com</code></div>
+                                            <div>Task ID: <code class="text-gray-500">Dynamic</code></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File References -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h5 class="font-medium text-blue-900 mb-2">Configuration Files:</h5>
+                            <ul class="text-sm text-blue-800 space-y-1">
+                                <li>• <strong>Environment:</strong> <code>collections/environment.json</code></li>
+                                <li>• <strong>Collection:</strong> <code>collections/orkes-collection.json</code></li>
+                                <li>• <strong>Server Config:</strong> <code>server.js</code> (createDynamicEnvironment function)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadApiCallBuilder() {
+            document.getElementById('admin-content').innerHTML = `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">API Call Builder</h3>
+                        <p class="text-sm text-gray-600 mt-1">View reconstructed API calls and endpoints</p>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <!-- Newman Triggers Section -->
+                        <div>
+                            <h4 class="text-md font-semibold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                Newman Triggers
+                            </h4>
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h5 class="font-medium text-gray-900">Application Submission Trigger</h5>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Active</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600 space-y-2">
+                                        <div><strong>Endpoint:</strong> <code>POST /execute</code></div>
+                                        <div><strong>Server Location:</strong> <code>server.js:850-920</code></div>
+                                        <div><strong>Newman Command:</strong></div>
+                                        <pre class="bg-gray-800 text-green-400 p-2 rounded text-xs overflow-x-auto">newman run ./collections/orkes-collection.json -e dynamicEnvironment.json</pre>
+                                        <div><strong>Triggers When:</strong> Form submission with vendor application data</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- API Call Reconstruction -->
+                        <div>
+                            <h4 class="text-md font-semibold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                                Reconstructed API Calls
+                            </h4>
+                            <div class="space-y-4">
+                                <!-- JWT Token Request -->
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h5 class="font-medium text-gray-900 mb-2">1. JWT Token Request</h5>
+                                    <div class="text-sm space-y-2">
+                                        <div><strong>Method:</strong> <code class="bg-blue-100 text-blue-800 px-2 py-1 rounded">POST</code></div>
+                                        <div><strong>URL:</strong> <code>{{baseURL}}/api/token</code></div>
+                                        <div><strong>Resolved URL:</strong> <code class="text-green-600">https://developer.orkescloud.com/api/token</code></div>
+                                        <div><strong>Headers:</strong></div>
+                                        <pre class="bg-gray-800 text-white p-2 rounded text-xs">Content-Type: application/json</pre>
+                                        <div><strong>Body:</strong></div>
+                                        <pre class="bg-gray-800 text-white p-2 rounded text-xs">{
+  "keyId": "{{KEY}}",
+  "keySecret": "{{SECRET}}"
+}</pre>
+                                    </div>
+                                </div>
+
+                                <!-- Workflow Execution -->
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h5 class="font-medium text-gray-900 mb-2">2. Workflow Execution</h5>
+                                    <div class="text-sm space-y-2">
+                                        <div><strong>Method:</strong> <code class="bg-green-100 text-green-800 px-2 py-1 rounded">POST</code></div>
+                                        <div><strong>URL:</strong> <code>{{baseURL}}/api/workflow</code></div>
+                                        <div><strong>Resolved URL:</strong> <code class="text-green-600">https://developer.orkescloud.com/api/workflow</code></div>
+                                        <div><strong>Headers:</strong></div>
+                                        <pre class="bg-gray-800 text-white p-2 rounded text-xs">Content-Type: application/json
+Authorization: Bearer {{orkes_jwt}}</pre>
+                                        <div><strong>Body Structure:</strong></div>
+                                        <pre class="bg-gray-800 text-white p-2 rounded text-xs overflow-x-auto">{
+  "name": "SAP_vendor_onboarding_workflow",
+  "version": 1,
+  "input": {
+    "application_data": {
+      "business_name": "{{business_name}}",
+      "contact_email": "{{contact_email}}",
+      "business_contact_number": "{{business_contact_number}}",
+      "address": "{{address}}",
+      "business_license_id": "{{business_license_id}}",
+      "company_size": "{{company_size}}",
+      "years_in_business": "{{years_in_business}}",
+      "annual_revenue": "{{annual_revenue}}",
+      "business_type": "{{business_type}}",
+      "primary_services": "{{primary_services}}",
+      "preferred_payment_terms": "{{preferred_payment_terms}}",
+      "credit_references": "{{credit_references}}",
+      "insurance_coverage": "{{insurance_coverage}}",
+      "sustainability_initiatives": "{{sustainability_initiatives}}",
+      "certifications": "{{certifications}}",
+      "security_standards": "{{security_standards}}"
+    },
+    "approver_emails": {
+      "finance": "{{approver1_email}}",
+      "legal": "{{approver2_email}}",
+      "procurement": "{{approver3_email}}"
+    }
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Code Modification Guide -->
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <h5 class="font-medium text-yellow-900 mb-2">Code Modification Guide:</h5>
+                            <ul class="text-sm text-yellow-800 space-y-1">
+                                <li>• <strong>Add new form fields:</strong> Update <code>server.js</code> createDynamicEnvironment function (line ~780-820)</li>
+                                <li>• <strong>Modify API endpoints:</strong> Edit <code>collections/orkes-collection.json</code> request URLs</li>
+                                <li>• <strong>Change environment variables:</strong> Edit <code>collections/environment.json</code></li>
+                                <li>• <strong>Update approver emails:</strong> Modify environment.json approver email values</li>
+                                <li>• <strong>Add webhook endpoints:</strong> Create new routes in <code>server.js</code> (after line 1070)</li>
+                                <li>• <strong>Change workflow name:</strong> Update collection.json workflow execution request body</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadAssetsManager() {
+            document.getElementById('admin-content').innerHTML = `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Assets Manager</h3>
+                        <p class="text-sm text-gray-600 mt-1">Manage logos, domain configuration, and site assets</p>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <!-- Current Logo Section -->
+                        <div>
+                            <h4 class="text-md font-semibold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                Current Logo
+                            </h4>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0">
+                                        <img src="NEWUI/mutler.png" alt="Current Logo" class="h-16 w-auto rounded border">
+                                    </div>
+                                    <div class="text-sm">
+                                        <div><strong>File:</strong> <code>NEWUI/mutler.png</code></div>
+                                        <div><strong>Referenced in:</strong> <code>public/index.html</code> (line ~85)</div>
+                                        <div><strong>Usage:</strong> Header logo and branding</div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-xs text-gray-600">
+                                    <strong>To change logo:</strong> Replace the file <code>NEWUI/mutler.png</code> with your new logo (recommended size: 200x60px, PNG format)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Domain Configuration -->
+                        <div>
+                            <h4 class="text-md font-semibold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                                </svg>
+                                Domain Configuration
+                            </h4>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 mb-2">Current Server Port</div>
+                                        <div class="text-sm"><code class="bg-white px-2 py-1 rounded border">localhost:3000</code></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 mb-2">Webhook URLs</div>
+                                        <div class="space-y-1 text-xs">
+                                            <div>Finance Approval: <code class="bg-white px-2 py-1 rounded border">http://localhost:3000/approve-finance</code></div>
+                                            <div>Legal Approval: <code class="bg-white px-2 py-1 rounded border">http://localhost:3000/approve-legal</code></div>
+                                            <div>Procurement Approval: <code class="bg-white px-2 py-1 rounded border">http://localhost:3000/approve-procurement</code></div>
+                                            <div>Status Update: <code class="bg-white px-2 py-1 rounded border">http://localhost:3000/workflow-status-update</code></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                                        <div class="text-sm font-medium text-blue-900 mb-1">Domain Migration Guide:</div>
+                                        <ul class="text-xs text-blue-800 space-y-1">
+                                            <li>1. Update <code>server.js</code> PORT configuration (line ~30)</li>
+                                            <li>2. Update webhook URLs in Orkes workflow definitions</li>
+                                            <li>3. Update any hardcoded localhost references</li>
+                                            <li>4. Configure reverse proxy/SSL if needed</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Structure -->
+                        <div>
+                            <h4 class="text-md font-semibold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                                </svg>
+                                Asset File Structure
+                            </h4>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="text-sm space-y-2">
+                                    <div class="font-medium text-gray-900">Static Assets Location:</div>
+                                    <div class="ml-4 space-y-1 text-xs font-mono">
+                                        <div>📁 <strong>public/</strong> - Main application files</div>
+                                        <div class="ml-4">📄 index.html - Main application file</div>
+                                        <div>📁 <strong>NEWUI/</strong> - UI assets and designs</div>
+                                        <div class="ml-4">🖼️ mutler.png - Current logo</div>
+                                        <div class="ml-4">📄 proposednewUI.html - Design reference</div>
+                                        <div>📁 <strong>collections/</strong> - Newman/Postman collections</div>
+                                        <div class="ml-4">📄 orkes-collection.json - API calls</div>
+                                        <div class="ml-4">📄 environment.json - Variables</div>
+                                        <div>📄 <strong>server.js</strong> - Backend server</div>
+                                    </div>
+                                    <div class="mt-4 text-xs text-gray-600 bg-white p-2 rounded border">
+                                        <strong>Note:</strong> All static files are served directly by the Express server. Logo and assets can be replaced directly in their respective folders.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
         // Initial load
         document.addEventListener('DOMContentLoaded', () => {
@@ -4240,9 +4970,9 @@
                         const badgeEl = document.getElementById(`${deptId === '1' ? 'finance' : deptId === '2' ? 'legal' : 'procurement'}-badge`);
                         if (badgeEl) {
                             if (count === 0) {
-                                badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600';
+                                badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
                             } else {
-                                badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800';
+                                badgeEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800';
                             }
                         }
                         
