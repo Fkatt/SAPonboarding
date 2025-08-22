@@ -1354,19 +1354,19 @@
             position: relative;
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: #374151;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 25px rgba(55, 65, 81, 0.3);
             transition: all 0.3s ease;
             animation: helpIconFloat 3s ease-in-out infinite;
         }
 
         .help-icon:hover .help-icon-inner {
             transform: scale(1.1);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 35px rgba(55, 65, 81, 0.4);
         }
 
         .help-icon-text {
@@ -1382,7 +1382,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            border: 2px solid rgba(102, 126, 234, 0.6);
+            border: 2px solid rgba(55, 65, 81, 0.6);
             border-radius: 50%;
             animation: helpIconPulse 2s ease-out infinite;
         }
@@ -1429,7 +1429,7 @@
         }
 
         .tech-header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: #374151;
             color: white;
             padding: 24px;
         }
@@ -1875,7 +1875,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
-                        <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" id="notification-badge">0</span>
+                        <span class="notification-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium" id="notification-badge" style="display: none;">0</span>
                     </div>
                 </div>
             </header>
@@ -1893,14 +1893,15 @@
             </div>
 
             <!-- Application Details Modal -->
-            <div class="modal-overlay fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4" id="application-modal-overlay" onclick="closeApplicationModal()"></div>
-            <div class="application-modal bg-white w-full max-w-4xl rounded-xl shadow-xl transform opacity-0 scale-95 hidden" id="application-modal">
-                <div class="modal-header p-6 border-b border-gray-200 flex justify-between items-center">
-                    <h2 class="text-xl font-semibold text-gray-900">Application Details</h2>
-                    <button class="modal-close text-gray-400 hover:text-gray-600 text-2xl" onclick="closeApplicationModal()">×</button>
-                </div>
-                <div class="modal-content p-6 max-h-[70vh] overflow-y-auto" id="application-modal-content">
-                    <!-- Application details will be populated here -->
+            <div class="modal-overlay fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4" id="application-modal-overlay" onclick="closeApplicationModal()">
+                <div class="application-modal bg-white w-full max-w-4xl rounded-xl shadow-xl transform opacity-0 scale-95 transition-all duration-300" id="application-modal" onclick="event.stopPropagation()">
+                    <div class="modal-header p-6 bg-gray-800 text-white rounded-t-xl flex justify-between items-center">
+                        <h2 class="text-xl font-semibold">Application Details</h2>
+                        <button class="modal-close text-gray-300 hover:text-white text-2xl" onclick="closeApplicationModal()">×</button>
+                    </div>
+                    <div class="modal-content p-6 max-h-[70vh] overflow-y-auto" id="application-modal-content">
+                        <!-- Application details will be populated here -->
+                    </div>
                 </div>
             </div>
 
@@ -3107,67 +3108,96 @@
             
             // Create file links
             const fileLinks = (app.file_urls || []).map((url, index) => 
-                `<a href="${url}" target="_blank" class="file-item">${(app.file_names || [])[index] || 'Document'}</a>`
+                `<a href="${url}" target="_blank" class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="text-sm text-gray-700">${(app.file_names || [])[index] || 'Document'}</span>
+                </a>`
             ).join('');
 
             content.innerHTML = `
-                <div class="application-details">
-                    <div class="details-section">
-                        <h3>🏢 Business Information</h3>
-                        <div class="details-grid">
-                            <div class="detail-item">
-                                <div class="detail-label">Business Name</div>
-                                <div class="detail-value">${app.business_name || 'Not provided'}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Business License ID</div>
-                                <div class="detail-value">${formData.business_license_id || 'Not provided'}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Contact Number</div>
-                                <div class="detail-value">${formData.business_contact_number || 'Not provided'}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Address</div>
-                                <div class="detail-value">${formData.address || 'Not provided'}</div>
-                            </div>
+                <div class="space-y-6">
+                    <!-- Business Information Card -->
+                    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v4H7V5zm8 8v2a1 1 0 01-1 1H6a1 1 0 01-1-1v-2h8z" clip-rule="evenodd" />
+                                </svg>
+                                Business Information
+                            </h3>
                         </div>
-                    </div>
-
-                    <div class="details-section">
-                        <h3>👤 Application Details</h3>
-                        <div class="details-grid">
-                            <div class="detail-item">
-                                <div class="detail-label">Workflow ID</div>
-                                <div class="detail-value">${workflowId}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Applicant Email</div>
-                                <div class="detail-value">${app.applicant_email}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Status</div>
-                                <div class="detail-value">
-                                    <span class="status-badge status-${app.status.toLowerCase()}">${app.status}</span>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="flex flex-col">
+                                    <dt class="text-sm font-medium text-gray-500 mb-1">Business Name</dt>
+                                    <dd class="text-sm text-gray-900 font-semibold">${app.business_name || 'Not provided'}</dd>
+                                </div>
+                                <div class="flex flex-col">
+                                    <dt class="text-sm font-medium text-gray-500 mb-1">License ID</dt>
+                                    <dd class="text-sm text-gray-900">${formData.business_license_id || 'Not provided'}</dd>
+                                </div>
+                                <div class="flex flex-col">
+                                    <dt class="text-sm font-medium text-gray-500 mb-1">Contact Number</dt>
+                                    <dd class="text-sm text-gray-900">${formData.business_contact_number || 'Not provided'}</dd>
+                                </div>
+                                <div class="flex flex-col">
+                                    <dt class="text-sm font-medium text-gray-500 mb-1">Applicant Email</dt>
+                                    <dd class="text-sm text-gray-900">${app.applicant_email || 'Not provided'}</dd>
+                                </div>
+                                <div class="flex flex-col">
+                                    <dt class="text-sm font-medium text-gray-500 mb-1">Status</dt>
+                                    <dd class="text-sm">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${app.status === 'APPROVED' ? 'bg-green-100 text-green-800' : app.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                                            ${app.status}
+                                        </span>
+                                    </dd>
+                                </div>
+                                <div class="flex flex-col">
+                                    <dt class="text-sm font-medium text-gray-500 mb-1">Created</dt>
+                                    <dd class="text-sm text-gray-900">${new Date(app.created_at).toLocaleString()}</dd>
                                 </div>
                             </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Submitted Date</div>
-                                <div class="detail-value">${new Date(app.created_at).toLocaleString()}</div>
-                            </div>
+                            ${formData.address ? `
+                                <div class="mt-6 pt-6 border-t border-gray-200">
+                                    <dt class="text-sm font-medium text-gray-500 mb-1">Business Address</dt>
+                                    <dd class="text-sm text-gray-900">${formData.address}</dd>
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
 
-                    <div class="approval-timeline">
-                        <h3>🔄 Approval Timeline</h3>
-                        ${getApprovalTimeline(workflowId, app.status, transactions, workflowStatus)}
+                    <!-- Approval Timeline Card -->
+                    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Approval Timeline
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            ${getApprovalTimeline(workflowId, app.status, transactions, workflowStatus)}
+                        </div>
                     </div>
 
                     ${fileLinks ? `
-                        <div class="details-section files-section">
-                            <h3>📎 Attached Documents</h3>
-                            <div class="files-list">
-                                ${fileLinks}
+                        <!-- Attached Documents Card -->
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                    </svg>
+                                    Attached Documents
+                                </h3>
+                            </div>
+                            <div class="p-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    ${fileLinks}
+                                </div>
                             </div>
                         </div>
                     ` : ''}
@@ -3175,8 +3205,16 @@
             `;
 
             // Show modal
-            modal.classList.add('open');
-            overlay.classList.add('open');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            
+            // Add animation classes
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'scale-95');
+                modal.classList.add('opacity-100', 'scale-100');
+            }, 10);
         }
 
         function getApprovalTimeline(workflowId, status, transactions, workflowStatus = null) {
@@ -3246,15 +3284,19 @@
                 }
                 
                 return `
-                    <div class="timeline-item">
-                        <div class="timeline-avatar ${avatarClass}">
+                    <div class="flex items-center gap-4 py-4 border-b border-gray-100 last:border-b-0">
+                        <div class="w-12 h-12 rounded-full ${avatarClass === 'approved' ? 'bg-green-100' : avatarClass === 'rejected' ? 'bg-red-100' : 'bg-gray-100'} flex items-center justify-center text-lg">
                             ${dept.icon}
                         </div>
-                        <div class="timeline-content">
-                            <div class="timeline-department">${dept.name}</div>
-                            <div class="timeline-status">${dept.email}</div>
-                            <div class="timeline-status">${timelineStatus}</div>
-                            ${timestamp ? `<div class="timeline-timestamp">${timestamp}</div>` : ''}
+                        <div class="flex-1">
+                            <div class="font-medium text-gray-900">${dept.name}</div>
+                            <div class="text-sm text-gray-500">${dept.email}</div>
+                            <div class="mt-1">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${avatarClass === 'approved' ? 'bg-green-100 text-green-800' : avatarClass === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                                    ${timelineStatus}
+                                </span>
+                            </div>
+                            ${timestamp ? `<div class="text-xs text-gray-400 mt-1">${timestamp}</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -3265,8 +3307,14 @@
             const modal = document.getElementById('application-modal');
             const overlay = document.getElementById('application-modal-overlay');
             
-            modal.classList.remove('open');
-            overlay.classList.remove('open');
+            // Add closing animation
+            modal.classList.add('opacity-0', 'scale-95');
+            modal.classList.remove('opacity-100', 'scale-100');
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }, 300);
         }
 
         // New Approver Interface Functions
