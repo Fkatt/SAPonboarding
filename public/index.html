@@ -1797,6 +1797,55 @@
             z-index: 0;
             pointer-events: none;
         }
+
+        /* Completion Screen Styles */
+        .completion-checkmark {
+            animation: bounceIn 0.6s ease-out 0.3s both;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        .poof-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            animation: poofOut 0.8s ease-out forwards;
+        }
+
+        @keyframes poofOut {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        #completion-screen.show {
+            display: flex !important;
+        }
+
+        #completion-screen.show #completion-modal {
+            transform: scale(1);
+            opacity: 1;
+        }
         </style>
 </head>
 <body class="flex min-h-screen bg-gray-50">
@@ -1909,6 +1958,34 @@
                             <img src="https://orkes.io/static/logo-orkes-color.svg" alt="Orkes" class="h-6 w-auto" title="Orkes" onerror="this.style.display='none'">
                         </a>
                     </div>
+                </div>
+            </div>
+
+            <!-- Completion Screen Modal -->
+            <div class="fixed inset-0 bg-black bg-opacity-80 z-60 hidden items-center justify-center" id="completion-screen">
+                <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 text-center p-8 transform scale-95 opacity-0 transition-all duration-500" id="completion-modal">
+                    <div class="mb-6">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 completion-checkmark">
+                            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Application Submitted!</h2>
+                        <p class="text-gray-600 mb-6">Your vendor application has been successfully submitted to the approval workflow.</p>
+                        
+                        <div class="reset-status bg-gray-50 rounded-lg p-4 mb-6">
+                            <div class="flex items-center justify-center mb-2">
+                                <div class="loading-spinner w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                                <span class="text-sm text-gray-600" id="reset-status-text">Resetting form...</span>
+                            </div>
+                            <div class="progress-bar bg-gray-200 rounded-full h-2">
+                                <div class="progress-fill bg-blue-600 h-full rounded-full transition-all duration-1000" id="progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Poof Effect Container -->
+                    <div class="poof-container absolute inset-0 pointer-events-none" id="poof-container"></div>
                 </div>
             </div>
 
@@ -2413,6 +2490,10 @@
 
                 if (result.success) {
                     activeWorkflowId = result.workflowId;
+                    
+                    // Show completion screen with reset animation
+                    showCompletionScreen();
+                    
                     showNotification('Application submitted successfully!', 'success');
                     showWorkflowStatus();
                     startWorkflowPolling();
@@ -2815,6 +2896,139 @@
             } catch (error) {
                 document.getElementById('transactions-table').innerHTML = 
                     `<tr><td colspan="6" style="text-align: center; color: #e74c3c;">Error loading transactions: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Completion Screen Functions
+        function showCompletionScreen() {
+            const screen = document.getElementById('completion-screen');
+            const modal = document.getElementById('completion-modal');
+            
+            // Show the screen
+            screen.classList.remove('hidden');
+            screen.classList.add('show');
+            
+            // Start the reset process
+            setTimeout(() => {
+                startResetProcess();
+            }, 1000);
+        }
+
+        function startResetProcess() {
+            const statusText = document.getElementById('reset-status-text');
+            const progressBar = document.getElementById('progress-bar');
+            
+            const steps = [
+                { text: 'Clearing form data...', progress: 25 },
+                { text: 'Resetting file uploads...', progress: 50 },
+                { text: 'Refreshing interface...', progress: 75 },
+                { text: 'Complete!', progress: 100 }
+            ];
+            
+            let currentStep = 0;
+            
+            const stepInterval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    const step = steps[currentStep];
+                    statusText.textContent = step.text;
+                    progressBar.style.width = step.progress + '%';
+                    
+                    if (currentStep === steps.length - 1) {
+                        setTimeout(() => {
+                            triggerPoofEffect();
+                        }, 500);
+                    }
+                    
+                    currentStep++;
+                } else {
+                    clearInterval(stepInterval);
+                }
+            }, 800);
+        }
+
+        function triggerPoofEffect() {
+            const container = document.getElementById('poof-container');
+            const modal = document.getElementById('completion-modal');
+            
+            // Create poof particles
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'poof-particle';
+                
+                // Random position within modal
+                const x = Math.random() * modal.offsetWidth;
+                const y = Math.random() * modal.offsetHeight;
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                // Random direction
+                const dx = (Math.random() - 0.5) * 200 + 'px';
+                const dy = (Math.random() - 0.5) * 200 + 'px';
+                particle.style.setProperty('--dx', dx);
+                particle.style.setProperty('--dy', dy);
+                
+                container.appendChild(particle);
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    if (container.contains(particle)) {
+                        container.removeChild(particle);
+                    }
+                }, 800);
+            }
+            
+            // Hide completion screen and reset form
+            setTimeout(() => {
+                hideCompletionScreen();
+                resetApplicationForm();
+            }, 1200);
+        }
+
+        function hideCompletionScreen() {
+            const screen = document.getElementById('completion-screen');
+            const modal = document.getElementById('completion-modal');
+            
+            modal.style.transform = 'scale(0.8)';
+            modal.style.opacity = '0';
+            
+            setTimeout(() => {
+                screen.classList.add('hidden');
+                screen.classList.remove('show');
+                
+                // Reset modal state
+                modal.style.transform = '';
+                modal.style.opacity = '';
+                
+                // Reset progress
+                document.getElementById('progress-bar').style.width = '0%';
+                document.getElementById('reset-status-text').textContent = 'Resetting form...';
+            }, 300);
+        }
+
+        function resetApplicationForm() {
+            // Reset the form
+            const form = document.getElementById('application-form');
+            if (form) {
+                form.reset();
+            }
+            
+            // Clear uploaded files
+            uploadedFiles = [];
+            updateFileList();
+            
+            // Hide workflow status
+            const workflowStatus = document.getElementById('workflow-status');
+            if (workflowStatus) {
+                workflowStatus.classList.add('hidden');
+            }
+            
+            // Reset active workflow
+            activeWorkflowId = null;
+            
+            // Stop polling
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
             }
         }
 
@@ -3280,16 +3494,19 @@
 
             // Show modal
             console.log('Showing modal...');
+            
+            // First show the overlay
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
             
-            // Add animation classes
-            setTimeout(() => {
-                modal.classList.remove('opacity-0', 'scale-95');
-                modal.classList.add('opacity-100', 'scale-100');
-            }, 10);
+            // Immediately make modal visible and animate in
+            modal.classList.remove('opacity-0', 'scale-95');
+            modal.classList.add('opacity-100', 'scale-100');
             
-            console.log('Modal should be visible now');
+            console.log('Modal classes after showing:', {
+                overlayClasses: overlay.className,
+                modalClasses: modal.className
+            });
         }
 
         function getApprovalTimeline(workflowId, status, transactions, workflowStatus = null) {
@@ -3382,6 +3599,8 @@
             const modal = document.getElementById('application-modal');
             const overlay = document.getElementById('application-modal-overlay');
             
+            console.log('Closing modal...');
+            
             // Add closing animation
             modal.classList.add('opacity-0', 'scale-95');
             modal.classList.remove('opacity-100', 'scale-100');
@@ -3389,6 +3608,7 @@
             setTimeout(() => {
                 overlay.classList.add('hidden');
                 overlay.classList.remove('flex');
+                console.log('Modal closed');
             }, 300);
         }
 
