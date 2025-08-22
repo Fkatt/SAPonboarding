@@ -118,6 +118,7 @@ app.get('/api/notifications/:email', async (req, res) => {
         console.log(`📧 Fetching notifications for email: ${email}`);
         const notifications = await db.getNotificationsByEmail(email);
         console.log(`📧 Found ${notifications.length} notifications for ${email}`);
+        console.log(`📧 Notifications:`, notifications.map(n => ({ id: n.id, title: n.title, type: n.type, read: n.read })));
         res.json(notifications);
     } catch (error) {
         console.error('Error fetching notifications:', error);
@@ -152,7 +153,7 @@ app.post('/api/notifications/:id/mark-read', async (req, res) => {
 app.post('/api/notifications', async (req, res) => {
     try {
         const notificationData = req.body;
-        const result = await db.insertNotification(notificationData);
+        const result = await db.addNotification(notificationData);
         res.json({ success: true, notification: result });
     } catch (error) {
         console.error('Error creating notification:', error);
@@ -659,15 +660,15 @@ app.post('/submit-application', async (req, res) => {
         }
 
         // Create submission notification
-        await db.insertNotification({
-            workflow_id: workflowId,
-            applicant_email: formData.applicant_email,
-            type: 'SUBMISSION',
+        await db.addNotification({
+            id: uuidv4(),
+            recipientEmail: formData.applicant_email,
             title: 'Application Submitted Successfully',
             message: `Your vendor application for "${formData.business_name}" has been submitted and is now under review by our approval team.`,
-            action_required: false,
-            department: 'System',
-            guidance: 'We will notify you as each department reviews your application. You can track the progress in the applications section.'
+            type: 'submission',
+            workflowId: workflowId,
+            read: false,
+            created_at: new Date().toISOString()
         });
 
         res.json({
@@ -732,28 +733,26 @@ app.post('/approver-response', async (req, res) => {
         const departmentName = departmentMapping[approverId] || `Department ${approverId}`;
         
         if (decision === 'APPROVED') {
-            await db.insertNotification({
-                workflow_id: workflowId,
-                applicant_email: workflow.applicant_email,
-                type: 'APPROVAL',
+            await db.addNotification({
+                id: uuidv4(),
+                recipientEmail: workflow.applicant_email,
                 title: `✅ Approved by ${departmentName}`,
-                message: `Great news! Your vendor application for "${workflow.business_name}" has been approved by the ${departmentName}.`,
-                action_required: false,
-                department: departmentName,
-                guidance: 'Your application is progressing through the approval process. We will notify you when all departments have completed their review.'
+                message: `Great news! Your vendor application for "${workflow.business_name}" has been approved by the ${departmentName}. Your application is progressing through the approval process.`,
+                type: 'approval',
+                workflowId: workflowId,
+                read: false,
+                created_at: new Date().toISOString()
             });
         } else if (decision === 'REJECTED') {
-            // This creates a notification but the rejection webhook should also create one with more details
-            await db.insertNotification({
-                workflow_id: workflowId,
-                applicant_email: workflow.applicant_email,
-                type: 'REJECTION',
+            await db.addNotification({
+                id: uuidv4(),
+                recipientEmail: workflow.applicant_email,
                 title: `❌ Rejected by ${departmentName}`,
-                message: `Your vendor application for "${workflow.business_name}" has been rejected by the ${departmentName}. Reason: ${reason || 'No specific reason provided'}`,
-                action_required: true,
-                department: departmentName,
-                rejection_reason: reason || 'No specific reason provided',
-                guidance: `Please review the feedback from ${departmentName} and make the necessary corrections to your application. Once updated, you may resubmit your vendor application for review.`
+                message: `Your vendor application for "${workflow.business_name}" has been rejected by the ${departmentName}. Reason: ${reason || 'No specific reason provided'}. Please review and resubmit with corrections.`,
+                type: 'rejection',
+                workflowId: workflowId,
+                read: false,
+                created_at: new Date().toISOString()
             });
         }
 
