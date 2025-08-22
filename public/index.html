@@ -3831,7 +3831,7 @@
 
             listElement.innerHTML = notifications.map(notification => `
                 <div class="notification-item ${notification.type.toLowerCase()} ${!notification.read ? 'unread' : ''}" 
-                     onclick="expandNotification('${notification.id}')"
+                     onclick="expandNotification('${notification.id}')">
                     <div class="notification-main">
                         <div class="notification-title">${notification.title}</div>
                         <div class="notification-time">${new Date(notification.created_at).toLocaleDateString()} ${new Date(notification.created_at).toLocaleTimeString()}</div>
