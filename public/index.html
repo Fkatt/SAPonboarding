@@ -1932,11 +1932,6 @@
                     <h1 style="font-size: 1.25rem; font-weight: 600; font-family: 'Inter', sans-serif;">S/4HANA Vendor Onboarding</h1>
                 </div>
                 <div style="display: flex; align-items: center; gap: 1.5rem;">
-                    <div class="help-icon" onclick="showTechnicalDoc('applications')" title="Technical Documentation" style="position: relative; background: rgba(255,255,255,0.1); color: white; border-radius: 50%;">
-                        <div class="help-icon-inner">
-                            <span class="help-icon-text" style="color: white;">?</span>
-                        </div>
-                    </div>
                     <svg style="width: 1.5rem; height: 1.5rem; cursor: pointer;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
@@ -1946,30 +1941,18 @@
                 </div>
             </header>
 
+            <!-- Help Icon (positioned like other tabs) -->
+            <div class="help-icon" onclick="showTechnicalDoc('applications')" title="Technical Documentation">
+                <div class="help-icon-inner">
+                    <span class="help-icon-text">?</span>
+                    <div class="help-icon-pulse"></div>
+                </div>
+            </div>
+
             <!-- Page Header -->
             <div class="fiori-page-header" style="padding: 1.5rem 0; margin-bottom: 2rem;">
                 <h2 style="font-size: 1.5rem; font-weight: 400; color: #1f2937; font-family: 'Inter', sans-serif; margin-bottom: 0.5rem;">Vendor Applications</h2>
                 <p style="color: #6b7280; font-size: 0.875rem;">Manage and review vendor onboarding applications</p>
-            </div>
-            
-            <!-- Statistics Grid -->
-            <div class="fiori-stats-grid">
-                <div class="fiori-stat-tile">
-                    <div class="fiori-stat-number" id="total-applications">-</div>
-                    <div class="fiori-stat-label">Total Applications</div>
-                </div>
-                <div class="fiori-stat-tile">
-                    <div class="fiori-stat-number" id="pending-applications">-</div>
-                    <div class="fiori-stat-label">Running</div>
-                </div>
-                <div class="fiori-stat-tile">
-                    <div class="fiori-stat-number" id="approved-applications">-</div>
-                    <div class="fiori-stat-label">Approved</div>
-                </div>
-                <div class="fiori-stat-tile">
-                    <div class="fiori-stat-number" id="rejected-applications">-</div>
-                    <div class="fiori-stat-label">Rejected</div>
-                </div>
             </div>
 
             <!-- Filters -->
@@ -2361,14 +2344,28 @@
             let html = '';
             applications.forEach(app => {
                 const formData = app.formData || {};
+                
+                // Debug logging
+                console.log('App data:', {
+                    businessName: app.businessName,
+                    applicantEmail: app.applicantEmail,
+                    formData: formData,
+                    formDataBusinessName: formData.business_name,
+                    formDataApplicantEmail: formData.applicant_email
+                });
+                
                 const fileLinks = (app.file_urls || []).map((url, index) => 
                     `<a href="${url}" target="_blank" class="file-link">${(app.file_names || [])[index] || 'Document'}</a>`
                 ).join(', ');
 
+                // Use formData first, then app properties as fallback
+                const businessName = formData.business_name || app.businessName || 'Unknown Business';
+                const applicantEmail = formData.applicant_email || app.applicantEmail || 'Unknown Applicant';
+
                 html += `
                     <div class="approver-card">
-                        <h3>Application: ${app.businessName || formData.business_name || 'Unknown Business'}</h3>
-                        <p><strong>Applicant:</strong> ${app.applicantEmail || formData.applicant_email || 'Unknown Applicant'}</p>
+                        <h3>Application: ${businessName}</h3>
+                        <p><strong>Applicant:</strong> ${applicantEmail}</p>
                         <p><strong>Workflow ID:</strong> ${app.workflowId}</p>
                         <p><strong>Business License:</strong> ${formData.business_license_id || 'Not provided'}</p>
                         <p><strong>Contact:</strong> ${formData.business_contact_number || 'Not provided'}</p>
