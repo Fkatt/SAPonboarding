@@ -2408,7 +2408,12 @@
                     setTimeout(() => {
                         loadApproverCounts(); // Update badge counts
                         loadDepartmentApplications('1'); // Load Finance department by default
+                        startApproverAutoRefresh(); // Start auto-refresh
                     }, 100);
+                    break;
+                default:
+                    // Stop auto-refresh when leaving approvers tab
+                    stopApproverAutoRefresh();
                     break;
             }
         }
@@ -3992,6 +3997,36 @@
 
         // Refresh approver counts periodically
         setInterval(loadApproverCounts, 45000); // Every 45 seconds
+        
+        // Auto-refresh approver inbox data
+        let approverRefreshInterval = null;
+        
+        function startApproverAutoRefresh() {
+            // Clear any existing interval
+            if (approverRefreshInterval) {
+                clearInterval(approverRefreshInterval);
+            }
+            
+            // Start refreshing every 30 seconds
+            approverRefreshInterval = setInterval(() => {
+                // Only refresh if approvers tab is active
+                const approversTab = document.getElementById('approvers-tab');
+                if (approversTab && approversTab.classList.contains('active')) {
+                    console.log('Auto-refreshing approver inbox...');
+                    loadApproverCounts(); // Update badge counts
+                    if (currentDepartment) {
+                        loadDepartmentApplications(currentDepartment); // Refresh current department
+                    }
+                }
+            }, 30000); // Every 30 seconds
+        }
+        
+        function stopApproverAutoRefresh() {
+            if (approverRefreshInterval) {
+                clearInterval(approverRefreshInterval);
+                approverRefreshInterval = null;
+            }
+        }
 
         // New Inbox Interface Functions
         let currentDepartment = '1';
@@ -4222,20 +4257,30 @@
         }
         
         function updateReminderCount(deptId, applications) {
-            // Calculate reminder count based on days since submission
-            let reminderCount = 0;
+            // Calculate applications needing attention based on days since submission
+            let urgentCount = 0;
+            let overdueCount = 0;
             applications.forEach(app => {
                 const createdDate = app.createdAt || app.created_at;
                 if (createdDate) {
                     const daysSinceSubmission = Math.floor((new Date() - new Date(createdDate)) / (1000 * 60 * 60 * 24));
-                    if (daysSinceSubmission > 1) reminderCount++;
+                    if (daysSinceSubmission > 3) urgentCount++;
+                    else if (daysSinceSubmission > 1) overdueCount++;
                 }
             });
             
             const reminderEl = document.getElementById(`reminder-count-${deptId}`);
             if (reminderEl) {
-                reminderEl.textContent = `${reminderCount} reminder${reminderCount !== 1 ? 's' : ''} sent`;
-                reminderEl.className = reminderCount > 0 ? 'text-xs text-orange-500 mt-1 font-medium' : 'text-xs text-gray-400 mt-1';
+                if (urgentCount > 0) {
+                    reminderEl.textContent = `${urgentCount} urgent (3+ days)`;
+                    reminderEl.className = 'text-xs text-red-500 mt-1 font-medium';
+                } else if (overdueCount > 0) {
+                    reminderEl.textContent = `${overdueCount} needs attention`;
+                    reminderEl.className = 'text-xs text-orange-500 mt-1 font-medium';
+                } else {
+                    reminderEl.textContent = 'All current';
+                    reminderEl.className = 'text-xs text-green-500 mt-1';
+                }
             }
         }
         
