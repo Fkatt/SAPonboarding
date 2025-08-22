@@ -494,6 +494,12 @@ app.post('/submit-application', async (req, res) => {
         const { formData } = req.body;
         const workflowId = `wf_${uuidv4().replace(/-/g, '').substring(0, 8)}`;
         
+        console.log('=== FORM SUBMISSION DEBUG ===');
+        console.log('Raw request body:', JSON.stringify(req.body, null, 2));
+        console.log('Extracted formData:', JSON.stringify(formData, null, 2));
+        console.log('Generated workflowId:', workflowId);
+        console.log('=== END FORM SUBMISSION DEBUG ===');
+        
         console.log('Received application submission:', {
             workflowId,
             businessName: formData.business_name,
@@ -540,19 +546,26 @@ app.post('/submit-application', async (req, res) => {
 
         // Create dynamic environment and run Newman workflow
         try {
+            console.log('=== NEWMAN WORKFLOW SETUP ===');
             const protocol = req.protocol || 'https';
             const host = req.get('host') || process.env.RENDER_EXTERNAL_URL?.replace('https://', '') || 'localhost:10000';
             const baseUrl = `${protocol}://${host}`;
+            console.log('Base URL for workflow:', baseUrl);
             
             const envPath = await createDynamicEnvironment(formData, workflowId, baseUrl);
+            console.log('Created dynamic environment at:', envPath);
+            
             const collectionPath = path.join(__dirname, 'collections', 'orkes-collection.json');
+            console.log('Using collection at:', collectionPath);
             
             // Run Newman workflow sequence - run all folders together to share environment
-            console.log('Starting Newman workflow sequence...');
+            console.log('Starting Newman workflow sequence with folders: ["1. Get JWT Token", "2. Start Onboarding Workflow", "3. Get Running Task IDs"]');
             
             // Run initial workflow setup (Steps 1, 2, 3) together to preserve JWT token
             const result = await runNewmanCollection(collectionPath, envPath, ['1. Get JWT Token', '2. Start Onboarding Workflow', '3. Get Running Task IDs']);
             console.log('Initial workflow sequence completed');
+            console.log('Newman result summary:', result ? 'Success' : 'Failed');
+            console.log('=== END NEWMAN WORKFLOW SETUP ===');
             
             // Save the JWT token and other variables back to the dynamic environment file
             // This ensures the token is available for later approver responses
