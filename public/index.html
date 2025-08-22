@@ -746,17 +746,24 @@
                 const data = Object.fromEntries(formData.entries());
                 data.uploadedFiles = uploadedFiles;
 
+                // Debug logging to verify form data collection
+                console.log('Form data being submitted:', data);
+                console.log('Uploaded files:', uploadedFiles);
+
                 const submitBtn = document.getElementById('submit-btn');
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = 'Submitting...';
 
                 try {
+                    const requestPayload = { formData: data };
+                    console.log('Request payload being sent:', requestPayload);
+                    
                     const response = await fetch('/submit-application', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ formData: data })
+                        body: JSON.stringify(requestPayload)
                     });
 
                     const result = await response.json();
