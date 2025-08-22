@@ -2403,6 +2403,13 @@
                 case 'transactions':
                     loadTransactions();
                     break;
+                case 'approvers':
+                    // Initialize the approver inbox interface
+                    setTimeout(() => {
+                        loadApproverCounts(); // Update badge counts
+                        loadDepartmentApplications('1'); // Load Finance department by default
+                    }, 100);
+                    break;
             }
         }
 
@@ -4021,6 +4028,17 @@
                 '3': 'Procurement'
             };
             
+            // Ensure the correct department tab is visually active
+            document.querySelectorAll('.dept-tab').forEach(tab => {
+                tab.classList.remove('active', 'border-blue-500', 'text-blue-600', 'bg-slate-50');
+                tab.classList.add('text-gray-500');
+            });
+            const activeTab = document.querySelector(`[data-dept="${deptId}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active', 'border-blue-500', 'text-blue-600', 'bg-slate-50');
+                activeTab.classList.remove('text-gray-500');
+            }
+            
             titleEl.textContent = `${departmentNames[deptId]} Pending Reviews`;
             subtitleEl.textContent = 'Applications awaiting your approval';
             
@@ -4262,11 +4280,13 @@
             `;
         }
         
-        // Initialize the first department on page load
+        // Initialize the first department on page load (only if approvers tab is active)
         document.addEventListener('DOMContentLoaded', function() {
-            // Load Finance department by default after a short delay to ensure DOM is ready
+            // Check if approvers tab is active and load data accordingly
             setTimeout(() => {
-                if (document.getElementById('application-inbox')) {
+                const approversTab = document.getElementById('approvers-tab');
+                if (approversTab && approversTab.classList.contains('active') && document.getElementById('application-inbox')) {
+                    loadApproverCounts();
                     loadDepartmentApplications('1');
                 }
             }, 500);
