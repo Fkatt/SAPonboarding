@@ -2974,6 +2974,11 @@
             });
             
             data.uploadedFiles = uploadedFiles;
+            
+            // Store applicant email in localStorage for notification retrieval
+            if (data.applicant_email) {
+                localStorage.setItem('applicantEmail', data.applicant_email);
+            }
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
@@ -3777,7 +3782,12 @@
             const applicantEmailField = document.getElementById('applicant_email');
             let applicantEmail = applicantEmailField ? applicantEmailField.value : '';
             
-            // If no email in form, show instructions instead of trying demo
+            // Try to get email from localStorage if form field is empty
+            if (!applicantEmail) {
+                applicantEmail = localStorage.getItem('applicantEmail');
+            }
+            
+            // If still no email, show instructions
             if (!applicantEmail) {
                 document.getElementById('notification-list').innerHTML = `
                     <div class="notification-empty p-4 text-center text-gray-500">
@@ -3881,7 +3891,12 @@
             const applicantEmailField = document.getElementById('applicant_email');
             let applicantEmail = applicantEmailField ? applicantEmailField.value : '';
             
-            // If no email, hide badge and don't check
+            // Try to get email from localStorage if form field is empty
+            if (!applicantEmail) {
+                applicantEmail = localStorage.getItem('applicantEmail');
+            }
+            
+            // If still no email, hide badge and don't check
             if (!applicantEmail) {
                 const badge = document.getElementById('notification-badge');
                 if (badge) {
@@ -5237,6 +5252,9 @@ Authorization: Bearer {{orkes_jwt}}</pre>
             // Initial load
             loadApplications();
             loadApproverCounts();
+            
+            // Check for notifications on page load
+            updateNotificationCount();
             
             // Update notification count if email is present
             const applicantEmail = document.getElementById('applicant_email').value;
