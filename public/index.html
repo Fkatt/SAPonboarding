@@ -2164,15 +2164,15 @@
 
             let html = '';
             applications.forEach(app => {
-                const formData = app.form_data || {};
+                const formData = app.formData || {};
                 const fileLinks = (app.file_urls || []).map((url, index) => 
                     `<a href="${url}" target="_blank" class="file-link">${(app.file_names || [])[index] || 'Document'}</a>`
                 ).join(', ');
 
                 html += `
                     <div class="approver-card">
-                        <h3>Application: ${app.business_name}</h3>
-                        <p><strong>Applicant:</strong> ${app.applicant_email}</p>
+                        <h3>Application: ${app.businessName || formData.business_name || 'Unknown Business'}</h3>
+                        <p><strong>Applicant:</strong> ${app.applicantEmail || formData.applicant_email || 'Unknown Applicant'}</p>
                         <p><strong>Workflow ID:</strong> ${app.workflowId}</p>
                         <p><strong>Business License:</strong> ${formData.business_license_id || 'Not provided'}</p>
                         <p><strong>Contact:</strong> ${formData.business_contact_number || 'Not provided'}</p>

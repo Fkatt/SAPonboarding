@@ -324,7 +324,8 @@ class FileStorage {
                         businessName: workflow.business_name,
                         applicantEmail: workflow.applicant_email,
                         createdAt: workflow.created_at,
-                        approverId: approverId
+                        approverId: approverId,
+                        formData: workflow.form_data || {}
                     });
                 }
             }
