@@ -1804,8 +1804,10 @@
     <!-- Sidebar -->
     <aside class="w-64 bg-gray-800 flex-shrink-0 p-4 border-r border-gray-200 flex flex-col">
         <!-- Logo -->
-        <div class="flex items-center gap-3 p-4 mb-8">
-            <img src="FlowBenchlogo.png" alt="Logo" class="h-10 w-10" onerror="this.style.display='none'">
+        <div class="m-2 mb-6">
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                <img src="FlowBenchlogo.png" alt="Logo" class="h-12 w-auto mx-auto" onerror="this.style.display='none'">
+            </div>
         </div>
 
         <!-- Navigation -->
@@ -1889,22 +1891,22 @@
             <!-- Tab Content -->
             <main>
             
-            <!-- Powered By Footer - Bottom Right -->
-            <div class="fixed bottom-4 right-4 z-40">
-                <div class="flex items-center gap-3 bg-white rounded-lg shadow-lg p-3 border">
+            <!-- Powered By Footer - Bottom Center -->
+            <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30">
+                <div class="flex items-center gap-4 bg-white rounded-lg shadow-lg px-4 py-2 border">
                     <span class="text-sm font-medium text-blue-600">Powered by</span>
-                    <div class="flex items-center space-x-3">
-                        <a href="https://nodejs.org/" target="_blank" class="tech-icon">
-                            <img src="nodejs.png" alt="Node.js" class="h-6 w-6" title="Node.js" onerror="this.style.display='none'">
+                    <div class="flex items-center space-x-4">
+                        <a href="https://nodejs.org/" target="_blank" class="tech-icon hover:scale-110 transition-transform">
+                            <img src="nodejs.png" alt="Node.js" class="h-8 w-auto" title="Node.js" onerror="this.style.display='none'">
                         </a>
-                        <a href="https://expressjs.com/" target="_blank" class="tech-icon">
-                            <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/express-logo.33793bb59f33.svg" alt="Express.js" class="h-5" title="Express.js">
+                        <a href="https://expressjs.com/" target="_blank" class="tech-icon hover:scale-110 transition-transform">
+                            <img src="https://expressjs.com/images/express-facebook-share.png" alt="Express.js" class="h-6 w-auto" title="Express.js" onerror="this.style.display='none'">
                         </a>
-                        <a href="https://github.com/expressjs/multer" target="_blank" class="tech-icon">
-                            <img src="mutler.png" alt="Multer" class="h-6 w-6" title="Multer" onerror="this.style.display='none'">
+                        <a href="https://github.com/expressjs/multer" target="_blank" class="tech-icon hover:scale-110 transition-transform">
+                            <img src="mutler.png" alt="Multer" class="h-8 w-auto" title="Multer" onerror="this.style.display='none'">
                         </a>
-                        <a href="https://orkes.io/" target="_blank" class="tech-icon">
-                            <img src="https://orkes.io/static/logo-orkes-color.svg" alt="Orkes" class="h-6 w-6" title="Orkes">
+                        <a href="https://orkes.io/" target="_blank" class="tech-icon hover:scale-110 transition-transform">
+                            <img src="https://orkes.io/static/logo-orkes-color.svg" alt="Orkes" class="h-6 w-auto" title="Orkes" onerror="this.style.display='none'">
                         </a>
                     </div>
                 </div>
@@ -3070,6 +3072,7 @@
 
         // Application Details Modal Functions
         async function showApplicationDetails(workflowId) {
+            console.log('showApplicationDetails called with:', workflowId);
             try {
                 // Fetch detailed application data, transactions, and workflow status with approvers
                 const [appResponse, transactionResponse, workflowStatusResponse] = await Promise.all([
@@ -3082,10 +3085,14 @@
                 const transactionResult = await transactionResponse.json();
                 const workflowStatusResult = await workflowStatusResponse.json();
                 
+                console.log('API responses:', { appResult, transactionResult, workflowStatusResult });
+                
                 if (appResult.success) {
                     const application = appResult.applications.find(app => 
                         (app.workflow_id || app.workflowId) === workflowId
                     );
+                    
+                    console.log('Found application:', application);
                     
                     if (application) {
                         const transactions = transactionResult.success ? transactionResult.transactions : [];
@@ -3093,17 +3100,25 @@
                         displayApplicationModal(application, transactions.filter(t => t.workflow_id === workflowId), workflowStatus);
                     } else {
                         console.error('Application not found:', workflowId);
+                        alert('Application not found');
                     }
+                } else {
+                    console.error('Failed to load applications:', appResult.error);
+                    alert('Failed to load application data');
                 }
             } catch (error) {
                 console.error('Error loading application details:', error);
+                alert('Error loading application details: ' + error.message);
             }
         }
 
         function displayApplicationModal(app, transactions = [], workflowStatus = null) {
+            console.log('displayApplicationModal called with:', { app, transactions, workflowStatus });
             const modal = document.getElementById('application-modal');
             const overlay = document.getElementById('application-modal-overlay');
             const content = document.getElementById('application-modal-content');
+            
+            console.log('Modal elements:', { modal, overlay, content });
             
             const formData = app.form_data || {};
             const workflowId = app.workflow_id || app.workflowId;
@@ -3207,8 +3222,7 @@
             `;
 
             // Show modal
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            console.log('Showing modal...');
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
             
@@ -3217,6 +3231,8 @@
                 modal.classList.remove('opacity-0', 'scale-95');
                 modal.classList.add('opacity-100', 'scale-100');
             }, 10);
+            
+            console.log('Modal should be visible now');
         }
 
         function getApprovalTimeline(workflowId, status, transactions, workflowStatus = null) {
