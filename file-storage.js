@@ -367,36 +367,6 @@ class FileStorage {
         }
     }
 
-    async getNotificationsByEmail(applicantEmail) {
-        try {
-            const notifications = await fs.readJson(this.notificationsFile);
-            return notifications.filter(n => n.applicant_email === applicantEmail)
-                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        } catch (error) {
-            console.error('Error getting notifications by email:', error);
-            return [];
-        }
-    }
-
-    async markNotificationAsRead(notificationId) {
-        try {
-            const notifications = await fs.readJson(this.notificationsFile);
-            const notificationIndex = notifications.findIndex(n => n.id === parseInt(notificationId));
-            
-            if (notificationIndex >= 0) {
-                notifications[notificationIndex].read = true;
-                notifications[notificationIndex].updated_at = new Date().toISOString();
-                await fs.writeJson(this.notificationsFile, notifications, { spaces: 2 });
-                console.log(`Notification ${notificationId} marked as read`);
-                return { changes: 1 };
-            }
-            
-            return { changes: 0 };
-        } catch (error) {
-            console.error('Error marking notification as read:', error);
-            throw error;
-        }
-    }
 
     // Notification operations
     async addNotification(notificationData) {
