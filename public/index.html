@@ -2049,11 +2049,6 @@
                 <button type="submit" class="btn" id="submit-btn">
                     Submit Application
                 </button>
-                
-                <!-- Temporary test button for completion screen -->
-                <button type="button" class="btn bg-green-600 hover:bg-green-700 ml-4" onclick="showCompletionScreen()" style="background-color: #16a34a;">
-                    Test Completion Screen
-                </button>
             </form>
         </div>
 
@@ -3046,7 +3041,16 @@
             
             // Clear uploaded files
             uploadedFiles = [];
-            updateFileList();
+            const uploadedFilesDiv = document.getElementById('uploaded-files');
+            if (uploadedFilesDiv) {
+                uploadedFilesDiv.innerHTML = '';
+            }
+            
+            // Reset file input
+            const fileInput = document.getElementById('file-input');
+            if (fileInput) {
+                fileInput.value = '';
+            }
             
             // Hide workflow status
             const workflowStatus = document.getElementById('workflow-status');
