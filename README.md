@@ -649,42 +649,93 @@ data/
 
 ## 🌐 API Endpoints
 
-### Application Management
-- `GET /applications` - Get all applications
-- `POST /applications` - Create new application
-- `PUT /applications/:id` - Update application
-- `DELETE /applications/:id` - Delete application
+### 🏠 **SAP Onboarding Application Server** (localhost:3000 / Production Domain)
 
-### Workflow Integration
-- `POST /execute` - Execute Newman collection (trigger Orkes workflow)
-- `GET /workflow-status/:workflowId` - Get workflow status
-- `POST /workflow-status-update` - Webhook for status updates
+#### Application Management
+- `GET /applications` - Get all vendor applications with status and form data
+- `GET /applications/:id` - Get specific application by ID
+- `POST /applications` - Create new vendor application
+- `PUT /applications/:id` - Update existing application
+- `DELETE /applications/:id` - Delete application record
 
-### Approval System
-- `POST /approve-finance` - Finance approval webhook
-- `POST /approve-legal` - Legal approval webhook  
-- `POST /approve-procurement` - Procurement approval webhook
-- `GET /approver-data` - Get approver dashboard data
+#### Form Submission & Workflow Trigger
+- `POST /execute` - **Main submission endpoint** - Accepts form data, creates dynamic Newman environment, triggers Orkes workflow
+- `GET /workflow-status/:workflowId` - Poll real-time workflow status from Orkes
+- `GET /approver-data` - Get approver dashboard data (pending applications by department)
 
-### Notification System
-- `GET /api/notifications/:email` - Get user notifications
-- `GET /api/notifications/:email/unread-count` - Get unread count
-- `POST /api/notifications` - Create notification
-- `POST /api/notifications/:id/mark-read` - Mark notification read
+#### Webhook Receivers (Called by Orkes Conductor)
+- `POST /approve-finance` - **Webhook** - Receives finance approval/rejection from Orkes
+- `POST /approve-legal` - **Webhook** - Receives legal approval/rejection from Orkes
+- `POST /approve-procurement` - **Webhook** - Receives procurement approval/rejection from Orkes
+- `POST /workflow-status-update` - **Webhook** - Receives general workflow status updates from Orkes
 
-### Transaction History
-- `GET /transactions` - Get all transactions
-- `GET /transactions/:applicationId` - Get app transactions
-- `POST /transactions` - Create transaction record
+#### Notification System
+- `GET /api/notifications/:email` - Get all notifications for specific email address
+- `GET /api/notifications/:email/unread-count` - Get count of unread notifications
+- `POST /api/notifications` - Create new notification (server-side only)
+- `POST /api/notifications/:id/mark-read` - Mark specific notification as read
 
-### File Management
-- `POST /upload` - File upload endpoint
-- `GET /uploads/:filename` - Serve uploaded files
+#### Transaction History & Audit Trail
+- `GET /transactions` - Get complete transaction history
+- `GET /transactions/:applicationId` - Get transactions for specific application
+- `POST /transactions` - Create new transaction record (server-side only)
 
-### Health & Monitoring
-- `GET /` - Serve main application
-- `GET /health` - Health check endpoint
-- `GET /api/status` - System status
+#### File Management
+- `POST /upload` - Upload files (documents, images) with validation
+- `GET /uploads/:filename` - Serve uploaded files with proper headers
+- `DELETE /uploads/:filename` - Delete uploaded file
+
+#### System & Documentation
+- `GET /` - Serve main application HTML (index.html)
+- `GET /README.md` - Serve documentation markdown for admin panel viewer
+- `GET /health` - Health check with system statistics
+- `GET /api/status` - Detailed system status and metrics
+
+### 🔗 **Orkes Conductor API** (https://developer.orkescloud.com)
+
+#### Authentication (via Newman)
+- `POST https://developer.orkescloud.com/api/token` - Get JWT token using API key/secret
+
+#### Workflow Management (via Newman)
+- `POST https://developer.orkescloud.com/api/workflow` - Start new workflow execution
+- `GET https://developer.orkescloud.com/api/workflow/{workflowId}` - Get workflow status
+- `GET https://developer.orkescloud.com/api/workflow/{workflowId}/tasks` - Get workflow tasks
+
+#### Task Management (via Newman - for approvals)
+- `POST https://developer.orkescloud.com/api/task` - Update task status (approve/reject)
+- `GET https://developer.orkescloud.com/api/task/{taskId}` - Get specific task details
+
+### 📊 **API Usage Flow**
+
+#### New Application Submission
+```
+1. Frontend form submission → POST /execute
+2. Server creates dynamic Newman environment
+3. Newman calls Orkes API to start workflow
+4. Orkes workflow creates approval tasks
+5. Orkes sends webhooks to /approve-* endpoints
+6. Server updates database and notifications
+7. Frontend polls /workflow-status for updates
+```
+
+#### Approver Actions
+```
+1. Approver views dashboard → GET /approver-data
+2. Approver makes decision → Newman calls Orkes task API
+3. Orkes processes approval → Sends webhook to server
+4. Server updates status → Creates notifications
+5. All interfaces refresh via polling
+```
+
+#### Real-time Updates
+```
+1. Frontend polls every 30 seconds:
+   - GET /workflow-status/:workflowId
+   - GET /api/notifications/:email/unread-count
+   - GET /approver-data (if on approvers tab)
+2. Server responds with current data from file storage
+3. UI updates automatically with new information
+```
 
 ---
 

@@ -141,8 +141,8 @@ app.get('/api/notifications/:email/unread-count', async (req, res) => {
 app.post('/api/notifications/:id/mark-read', async (req, res) => {
     try {
         const { id } = req.params;
-        const result = await db.markNotificationAsRead(id);
-        res.json({ success: result.changes > 0, changes: result.changes });
+        const result = await db.markNotificationRead(id);
+        res.json({ success: result });
     } catch (error) {
         console.error('Error marking notification as read:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -587,6 +587,18 @@ app.post('/submit-application', async (req, res) => {
             details: `Application submitted by ${formData.applicant_email}`
         });
 
+        // Create initial notification for the applicant
+        await db.addNotification({
+            id: uuidv4(),
+            recipientEmail: formData.applicant_email,
+            title: 'Application Submitted Successfully',
+            message: `Your vendor onboarding application for ${formData.business_name} has been submitted and is now being reviewed by our approval team.`,
+            type: 'submission',
+            workflowId: workflowId,
+            read: false,
+            created_at: new Date().toISOString()
+        });
+
         // Initialize approver actions - always create 3 approvers
         const approverEmails = ['finance@sapco.com', 'legal@sapco.com', 'procurement@sapco.com'];
         for (let i = 1; i <= 3; i++) {
@@ -1016,15 +1028,15 @@ app.post('/approval', async (req, res) => {
             });
             
             // Create final approval notification
-            await db.insertNotification({
-                workflow_id: workflow.workflow_id,
-                applicant_email: workflow.applicant_email,
-                type: 'FINAL_APPROVAL',
+            await db.addNotification({
+                id: uuidv4(),
+                recipientEmail: workflow.applicant_email,
                 title: '🎉 Application Fully Approved!',
-                message: `Congratulations! Your vendor application for "${workflow.business_name}" has been approved by all departments and is now complete.`,
-                action_required: false,
-                department: 'All Departments',
-                guidance: 'Your vendor account will be activated shortly. You will receive separate confirmation once your account is ready for use.'
+                message: `Congratulations! Your vendor application for "${workflow.business_name}" has been approved by all departments and is now complete. Your vendor account will be activated shortly.`,
+                type: 'approval',
+                workflowId: workflow.workflow_id,
+                read: false,
+                created_at: new Date().toISOString()
             });
             
             // Cleanup dynamic environment
@@ -1105,16 +1117,15 @@ app.post('/rejection', async (req, res) => {
                 });
                 
                 // Create notification for the rejection
-                await db.insertNotification({
-                    workflow_id: workflow.workflow_id,
-                    applicant_email: applicantEmail,
-                    type: 'REJECTION',
+                await db.addNotification({
+                    id: uuidv4(),
+                    recipientEmail: applicantEmail,
                     title: `Application Rejected - ${departmentName}`,
-                    message: `Your vendor application for "${businessName}" has been rejected by the ${departmentName}. Reason: ${rejectionReason}`,
-                    action_required: true,
-                    department: departmentName,
-                    rejection_reason: rejectionReason,
-                    guidance: `Please review the feedback from ${departmentName} and make the necessary corrections to your application. Once updated, you may resubmit your vendor application for review.`
+                    message: `Your vendor application for "${businessName}" has been rejected by the ${departmentName}. Reason: ${rejectionReason}. Please review the feedback and make necessary corrections before resubmitting.`,
+                    type: 'rejection',
+                    workflowId: workflow.workflow_id,
+                    read: false,
+                    created_at: new Date().toISOString()
                 });
                 
                 // Cleanup dynamic environment

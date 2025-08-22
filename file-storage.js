@@ -398,10 +398,64 @@ class FileStorage {
         }
     }
 
+    // Notification operations
+    async addNotification(notificationData) {
+        try {
+            const notifications = await fs.readJson(this.notificationsFile);
+            const notification = {
+                id: notificationData.id,
+                recipientEmail: notificationData.recipientEmail,
+                title: notificationData.title,
+                message: notificationData.message,
+                type: notificationData.type,
+                workflowId: notificationData.workflowId,
+                read: false,
+                created_at: notificationData.created_at || new Date().toISOString()
+            };
+            
+            notifications.push(notification);
+            await fs.writeJson(this.notificationsFile, notifications, { spaces: 2 });
+            console.log(`Notification added for: ${notificationData.recipientEmail}`);
+            return notification;
+        } catch (error) {
+            console.error('Error adding notification:', error);
+            throw error;
+        }
+    }
+
+    async getNotificationsByEmail(email) {
+        try {
+            const notifications = await fs.readJson(this.notificationsFile);
+            const userNotifications = notifications.filter(n => n.recipientEmail === email);
+            console.log(`Found ${userNotifications.length} notifications for ${email}`);
+            return userNotifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        } catch (error) {
+            console.error('Error getting notifications by email:', error);
+            return [];
+        }
+    }
+
+    async markNotificationRead(notificationId) {
+        try {
+            const notifications = await fs.readJson(this.notificationsFile);
+            const notification = notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.read = true;
+                await fs.writeJson(this.notificationsFile, notifications, { spaces: 2 });
+                console.log(`Notification ${notificationId} marked as read`);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+            return false;
+        }
+    }
+
     async getUnreadNotificationCount(applicantEmail) {
         try {
             const notifications = await fs.readJson(this.notificationsFile);
-            return notifications.filter(n => n.applicant_email === applicantEmail && !n.read).length;
+            return notifications.filter(n => n.recipientEmail === applicantEmail && !n.read).length;
         } catch (error) {
             console.error('Error getting unread notification count:', error);
             return 0;
