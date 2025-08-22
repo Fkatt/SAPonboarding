@@ -1963,7 +1963,7 @@
 
             <!-- Application Details Modal -->
             <div class="modal-overlay fixed inset-0 bg-black bg-opacity-60 z-70 hidden items-center justify-center p-4" id="application-modal-overlay" onclick="closeApplicationModal()">
-                <div class="application-modal bg-white w-full max-w-4xl rounded-xl shadow-xl transform opacity-0 scale-95 transition-all duration-300" id="application-modal" onclick="event.stopPropagation()">
+                <div class="application-modal bg-white w-full max-w-4xl rounded-xl shadow-xl transform transition-all duration-300" id="application-modal" onclick="event.stopPropagation()">
                     <div class="modal-header p-6 bg-gray-800 text-white rounded-t-xl flex justify-between items-center">
                         <h2 class="text-xl font-semibold">Application Details</h2>
                         <button class="modal-close text-gray-300 hover:text-white text-2xl" onclick="closeApplicationModal()">×</button>
@@ -3472,7 +3472,17 @@
 
         // Application Details Modal Functions
         let modalInProgress = false;
+        let lastModalCall = 0;
+        
         async function showApplicationDetails(workflowId) {
+            // Prevent multiple rapid calls (debounce)
+            const now = Date.now();
+            if (now - lastModalCall < 500) { // 500ms debounce
+                console.log('Debouncing modal call');
+                return;
+            }
+            lastModalCall = now;
+            
             // Prevent multiple calls
             if (modalInProgress) {
                 console.log('Modal already in progress, ignoring call');
@@ -3683,12 +3693,17 @@
             // Show modal with the custom CSS class
             modal.classList.add('open');
             
+            // Ensure body scroll is not locked
+            document.body.style.overflow = 'auto';
+            
             console.log('Modal should be visible now. Classes:', {
                 overlayClasses: overlay.className,
                 modalClasses: modal.className,
                 overlayDisplay: window.getComputedStyle(overlay).display,
                 modalVisibility: window.getComputedStyle(modal).visibility,
-                modalOpacity: window.getComputedStyle(modal).opacity
+                modalOpacity: window.getComputedStyle(modal).opacity,
+                modalZIndex: window.getComputedStyle(modal).zIndex,
+                overlayZIndex: window.getComputedStyle(overlay).zIndex
             });
             
             // Reset the progress flag since modal is now open
@@ -4030,7 +4045,8 @@
             
             let html = '';
             applications.forEach((app, index) => {
-                const daysSinceSubmission = Math.floor((new Date() - new Date(app.createdAt)) / (1000 * 60 * 60 * 24));
+                const createdDate = app.createdAt || app.created_at;
+                const daysSinceSubmission = createdDate ? Math.floor((new Date() - new Date(createdDate)) / (1000 * 60 * 60 * 24)) : 0;
                 const urgencyClass = daysSinceSubmission > 3 ? 'unread' : '';
                 const urgencyIcon = daysSinceSubmission > 3 ? '🔴' : daysSinceSubmission > 1 ? '🟡' : '🟢';
                 
@@ -4191,8 +4207,11 @@
             // Calculate reminder count based on days since submission
             let reminderCount = 0;
             applications.forEach(app => {
-                const daysSinceSubmission = Math.floor((new Date() - new Date(app.createdAt)) / (1000 * 60 * 60 * 24));
-                if (daysSinceSubmission > 1) reminderCount++;
+                const createdDate = app.createdAt || app.created_at;
+                if (createdDate) {
+                    const daysSinceSubmission = Math.floor((new Date() - new Date(createdDate)) / (1000 * 60 * 60 * 24));
+                    if (daysSinceSubmission > 1) reminderCount++;
+                }
             });
             
             const reminderEl = document.getElementById(`reminder-count-${deptId}`);
