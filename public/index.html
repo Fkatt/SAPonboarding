@@ -768,8 +768,8 @@
                         uploadedFiles = [];
                         uploadedFilesDiv.innerHTML = '';
                         
-                        // Switch to applications tab
-                        switchTab('applications', document.querySelector('.tab[data-tab="applications"]'));
+                        // Switch to approvers tab to show workflow progress
+                        switchTab('approvers', document.querySelector('.tab[data-tab="approvers"]'));
                     } else {
                         throw new Error(result.error || 'Submission failed');
                     }
