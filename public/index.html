@@ -1925,7 +1925,7 @@
             </div>
 
             <!-- Application Details Modal -->
-            <div class="modal-overlay fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4" id="application-modal-overlay" onclick="closeApplicationModal()">
+            <div class="modal-overlay fixed inset-0 bg-black bg-opacity-60 z-70 hidden items-center justify-center p-4" id="application-modal-overlay" onclick="closeApplicationModal()">
                 <div class="application-modal bg-white w-full max-w-4xl rounded-xl shadow-xl transform opacity-0 scale-95 transition-all duration-300" id="application-modal" onclick="event.stopPropagation()">
                     <div class="modal-header p-6 bg-gray-800 text-white rounded-t-xl flex justify-between items-center">
                         <h2 class="text-xl font-semibold">Application Details</h2>
@@ -2774,7 +2774,7 @@
                 }
 
                 html += `
-                    <tr class="hover:bg-gray-50 cursor-pointer" onclick="showApplicationDetails('${app.workflow_id || app.workflowId}')">
+                    <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600" title="Click to view in Orkes Conductor">
                             <a href="https://play.orkes.io/workflowDef/${app.orkes_workflow_id || app.workflow_id || app.workflowId}" target="_blank" class="hover:underline" onclick="event.stopPropagation()">
                                 ${app.orkes_workflow_id || app.workflow_id || app.workflowId || 'N/A'}
@@ -2791,7 +2791,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${fileLinks || '<span class="text-gray-400">No files</span>'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" title="${new Date(app.created_at).toLocaleString()}">${new Date(app.created_at).toLocaleDateString()}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
-                            <button class="text-blue-600 hover:text-blue-800" onclick="event.stopPropagation(); showApplicationDetails('${app.workflow_id || app.workflowId}')">View</button>
+                            <button class="text-blue-600 hover:text-blue-800 font-medium px-3 py-1 rounded hover:bg-blue-50" onclick="showApplicationDetails('${app.workflow_id || app.workflowId}')">View</button>
                         </td>
                     </tr>
                 `;
@@ -3441,54 +3441,82 @@
             ).join('');
 
             content.innerHTML = `
-                <div class="space-y-6">
-                    <!-- Business Information Card -->
-                    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v4H7V5zm8 8v2a1 1 0 01-1 1H6a1 1 0 01-1-1v-2h8z" clip-rule="evenodd" />
+                <div class="space-y-8">
+                    <!-- Application Header -->
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold mb-2">Vendor Onboarding Application</h1>
+                                <p class="text-blue-100">Application ID: <span class="font-mono font-semibold">${workflowId}</span></p>
+                            </div>
+                            <div class="text-right">
+                                <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${app.status === 'APPROVED' ? 'bg-green-500 text-white' : app.status === 'REJECTED' ? 'bg-red-500 text-white' : 'bg-yellow-500 text-black'}">
+                                    ${app.status === 'APPROVED' ? '✅' : app.status === 'REJECTED' ? '❌' : '⏳'} ${app.status}
+                                </div>
+                                <p class="text-blue-100 text-sm mt-2">Submitted: ${new Date(app.created_at).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Applicant Information -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                Business Information
-                            </h3>
+                                Applicant Information
+                            </h2>
                         </div>
                         <div class="p-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="flex flex-col">
-                                    <dt class="text-sm font-medium text-gray-500 mb-1">Business Name</dt>
-                                    <dd class="text-sm text-gray-900 font-semibold">${app.business_name || 'Not provided'}</dd>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <dt class="text-sm font-medium text-gray-600 mb-1">Primary Contact Email</dt>
+                                    <dd class="text-base text-gray-900 font-semibold">${app.applicant_email || 'Not provided'}</dd>
                                 </div>
-                                <div class="flex flex-col">
-                                    <dt class="text-sm font-medium text-gray-500 mb-1">License ID</dt>
-                                    <dd class="text-sm text-gray-900">${formData.business_license_id || 'Not provided'}</dd>
-                                </div>
-                                <div class="flex flex-col">
-                                    <dt class="text-sm font-medium text-gray-500 mb-1">Contact Number</dt>
-                                    <dd class="text-sm text-gray-900">${formData.business_contact_number || 'Not provided'}</dd>
-                                </div>
-                                <div class="flex flex-col">
-                                    <dt class="text-sm font-medium text-gray-500 mb-1">Applicant Email</dt>
-                                    <dd class="text-sm text-gray-900">${app.applicant_email || 'Not provided'}</dd>
-                                </div>
-                                <div class="flex flex-col">
-                                    <dt class="text-sm font-medium text-gray-500 mb-1">Status</dt>
-                                    <dd class="text-sm">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${app.status === 'APPROVED' ? 'bg-green-100 text-green-800' : app.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
-                                            ${app.status}
-                                        </span>
-                                    </dd>
-                                </div>
-                                <div class="flex flex-col">
-                                    <dt class="text-sm font-medium text-gray-500 mb-1">Created</dt>
-                                    <dd class="text-sm text-gray-900">${new Date(app.created_at).toLocaleString()}</dd>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <dt class="text-sm font-medium text-gray-600 mb-1">Contact Phone</dt>
+                                    <dd class="text-base text-gray-900 font-semibold">${formData.business_contact_number || 'Not provided'}</dd>
                                 </div>
                             </div>
-                            ${formData.address ? `
-                                <div class="mt-6 pt-6 border-t border-gray-200">
-                                    <dt class="text-sm font-medium text-gray-500 mb-1">Business Address</dt>
-                                    <dd class="text-sm text-gray-900">${formData.address}</dd>
+                        </div>
+                    </div>
+
+                    <!-- Business Information -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                Business Information
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-6">
+                                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                                    <dt class="text-sm font-medium text-blue-700 mb-1">Legal Business Name</dt>
+                                    <dd class="text-lg text-blue-900 font-bold">${app.business_name || formData.business_name || 'Not provided'}</dd>
                                 </div>
-                            ` : ''}
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <dt class="text-sm font-medium text-gray-600 mb-1">Business License ID</dt>
+                                        <dd class="text-base text-gray-900 font-mono">${formData.business_license_id || 'Not provided'}</dd>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <dt class="text-sm font-medium text-gray-600 mb-1">Registration Date</dt>
+                                        <dd class="text-base text-gray-900">${new Date(app.created_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</dd>
+                                    </div>
+                                </div>
+                                
+                                ${formData.address ? `
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <dt class="text-sm font-medium text-gray-600 mb-2">Business Address</dt>
+                                        <dd class="text-base text-gray-900 whitespace-pre-line">${formData.address}</dd>
+                                    </div>
+                                ` : ''}
+                            </div>
                         </div>
                     </div>
 
@@ -3507,42 +3535,63 @@
                         </div>
                     </div>
 
-                    ${fileLinks ? `
-                        <!-- Attached Documents Card -->
-                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                            <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                    </svg>
-                                    Attached Documents
-                                </h3>
-                            </div>
-                            <div class="p-6">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <!-- Attached Documents -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Supporting Documents
+                                <span class="ml-2 text-sm font-normal text-gray-500">(${(app.file_urls || []).length} files)</span>
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            ${fileLinks ? `
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     ${fileLinks}
                                 </div>
-                            </div>
+                            ` : `
+                                <div class="text-center py-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <p class="text-gray-500">No supporting documents attached</p>
+                                </div>
+                            `}
                         </div>
-                    ` : ''}
+                    </div>
                 </div>
             `;
 
             // Show modal
             console.log('Showing modal...');
             
+            // Ensure elements exist
+            if (!overlay || !modal) {
+                console.error('Modal elements not found!', { overlay, modal });
+                return;
+            }
+            
             // First show the overlay
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
             
-            // Immediately make modal visible and animate in
-            modal.classList.remove('opacity-0', 'scale-95');
-            modal.classList.add('opacity-100', 'scale-100');
+            // Force a reflow to ensure the display change takes effect
+            overlay.offsetHeight;
             
-            console.log('Modal classes after showing:', {
-                overlayClasses: overlay.className,
-                modalClasses: modal.className
-            });
+            // Then make modal visible and animate in
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'scale-95');
+                modal.classList.add('opacity-100', 'scale-100');
+                
+                console.log('Modal should be visible now. Classes:', {
+                    overlayClasses: overlay.className,
+                    modalClasses: modal.className,
+                    overlayDisplay: window.getComputedStyle(overlay).display,
+                    modalOpacity: window.getComputedStyle(modal).opacity
+                });
+            }, 10);
         }
 
         function getApprovalTimeline(workflowId, status, transactions, workflowStatus = null) {
