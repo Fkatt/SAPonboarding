@@ -158,20 +158,34 @@ async function createDynamicEnvironment(formData, workflowId, baseUrl) {
         const baseEnv = await fs.readJson(baseEnvPath);
         
         // Create dynamic environment with form data
+        const baseValues = [...baseEnv.values];
+        
+        // Update or add form data variables
+        const formVariables = [
+            { key: 'contact_email', value: formData.applicant_email },
+            { key: 'business_name', value: formData.business_name },
+            { key: 'business_contact_number', value: formData.business_contact_number || '' },
+            { key: 'address', value: formData.address || '' },
+            { key: 'business_license_id', value: formData.business_license_id || '' },
+            { key: 'approver1_email', value: 'finance@sapco.com' },
+            { key: 'approver2_email', value: 'legal@sapco.com' },
+            { key: 'approver3_email', value: 'procurement@sapco.com' },
+            { key: 'workflow_id', value: workflowId }
+        ];
+        
+        // Update existing variables or add new ones
+        formVariables.forEach(formVar => {
+            const existingIndex = baseValues.findIndex(v => v.key === formVar.key);
+            if (existingIndex >= 0) {
+                baseValues[existingIndex].value = formVar.value;
+            } else {
+                baseValues.push(formVar);
+            }
+        });
+        
         const dynamicEnv = {
             ...baseEnv,
-            values: [
-                ...baseEnv.values,
-                { key: 'contact_email', value: formData.applicant_email },
-                { key: 'business_name', value: formData.business_name },
-                { key: 'business_contact_number', value: formData.business_contact_number || '' },
-                { key: 'address', value: formData.address || '' },
-                { key: 'business_license_id', value: formData.business_license_id || '' },
-                { key: 'approver1_email', value: 'finance@sapco.com' },
-                { key: 'approver2_email', value: 'legal@sapco.com' },
-                { key: 'approver3_email', value: 'procurement@sapco.com' },
-                { key: 'workflow_id', value: workflowId }
-            ]
+            values: baseValues
         };
         
         // Add file URLs to environment
