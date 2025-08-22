@@ -2537,17 +2537,32 @@
             const approved = applications.filter(app => app.status === 'APPROVED').length;
             const rejected = applications.filter(app => app.status === 'REJECTED').length;
 
-            document.getElementById('total-applications').textContent = total;
-            document.getElementById('pending-applications').textContent = pending;
-            document.getElementById('approved-applications').textContent = approved;
-            document.getElementById('rejected-applications').textContent = rejected;
+            // Only update stats elements if they exist (for other tabs that might have them)
+            const totalEl = document.getElementById('total-applications');
+            const pendingEl = document.getElementById('pending-applications');
+            const approvedEl = document.getElementById('approved-applications');
+            const rejectedEl = document.getElementById('rejected-applications');
+            
+            if (totalEl) totalEl.textContent = total;
+            if (pendingEl) pendingEl.textContent = pending;
+            if (approvedEl) approvedEl.textContent = approved;
+            if (rejectedEl) rejectedEl.textContent = rejected;
         }
 
         // Filter Functions for Applications
         function filterApplications() {
-            const statusFilter = document.getElementById('filter-status').value.toLowerCase();
-            const businessNameFilter = document.getElementById('filter-business-name').value.toLowerCase();
-            const emailFilter = document.getElementById('filter-email').value.toLowerCase();
+            const statusEl = document.getElementById('filter-status');
+            const businessNameEl = document.getElementById('filter-business-name');
+            const emailEl = document.getElementById('filter-email');
+            
+            // Exit if filter elements don't exist (tab not active)
+            if (!statusEl || !businessNameEl || !emailEl) {
+                return;
+            }
+            
+            const statusFilter = statusEl.value.toLowerCase();
+            const businessNameFilter = businessNameEl.value.toLowerCase();
+            const emailFilter = emailEl.value.toLowerCase();
 
             let filtered = allApplications.filter(app => {
                 const statusMatch = !statusFilter || app.status.toLowerCase() === statusFilter;
@@ -2561,9 +2576,15 @@
         }
 
         function clearFilters() {
-            document.getElementById('filter-status').value = '';
-            document.getElementById('filter-business-name').value = '';
-            document.getElementById('filter-email').value = '';
+            const statusEl = document.getElementById('filter-status');
+            const businessNameEl = document.getElementById('filter-business-name');
+            const emailEl = document.getElementById('filter-email');
+            
+            // Only clear if elements exist
+            if (statusEl) statusEl.value = '';
+            if (businessNameEl) businessNameEl.value = '';
+            if (emailEl) emailEl.value = '';
+            
             renderFilteredApplications(allApplications);
         }
 
@@ -2720,7 +2741,8 @@
                     }
                     break;
                 case 'approvers':
-                    const approverId = document.getElementById('approver-select').value;
+                    const approverSelect = document.getElementById('approver-select');
+                    const approverId = approverSelect ? approverSelect.value : null;
                     if (approverId) {
                         loadApproverQueue();
                     }
