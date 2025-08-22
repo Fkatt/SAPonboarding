@@ -1249,7 +1249,17 @@
 
         async function loadNotifications() {
             try {
-                const response = await fetch('/notifications');
+                // Get email from form or default
+                const emailField = document.getElementById('applicant_email');
+                const userEmail = emailField ? emailField.value : 'jesse.wallace@gmail.com';
+                
+                if (!userEmail) {
+                    displayNotifications([]);
+                    updateNotificationBadge(0);
+                    return;
+                }
+                
+                const response = await fetch(`/api/notifications/${encodeURIComponent(userEmail)}`);
                 if (response.ok) {
                     const result = await response.json();
                     if (result.success) {
