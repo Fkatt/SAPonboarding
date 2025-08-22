@@ -2971,8 +2971,35 @@
                     title: '🚀 Submit Application - Technical Documentation',
                     content: `
                         <div class="doc-section">
-                            <h3>📋 Overview</h3>
-                            <p>The Submit Application section handles vendor onboarding form submissions and initiates the automated approval workflow using Orkes Conductor.</p>
+                            <h3>🎯 Primary Orkes API Endpoints</h3>
+                            <p><strong>Base URL:</strong> https://developer.orkescloud.com</p>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /api/token
+                                <p>Authenticate and get JWT token for Orkes API access</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /api/workflow
+                                <p>Start new onboarding_approval_workflow_v3 workflow instance</p>
+                            </div>
+                            
+                            <h4>📋 Example: Start Workflow</h4>
+                            <div class="json-code">{
+  "name": "onboarding_approval_workflow_v3",
+  "input": {
+    "applicant_email": "vendor@example.com",
+    "application_data": {
+      "business_name": "ABC Corporation",
+      "business_contact_number": "555-1234",
+      "address": "123 Business Ave",
+      "business_license_id": "BL78945"
+    },
+    "approver1_email": "finance@sapco.com",
+    "approver2_email": "legal@sapco.com",
+    "approver3_email": "procurement@sapco.com"
+  }
+}</div>
                             
                             <div class="tech-badges">
                                 <span class="tech-badge nodejs">Node.js</span>
@@ -3007,7 +3034,7 @@
                             
                             <div class="workflow-step">
                                 <span class="workflow-step-number">5</span>
-                                <strong>Orkes Trigger:</strong> Newman executes Postman collection to start Orkes Conductor workflow
+                                <strong>Orkes Trigger:</strong> Newman executes Postman collection to start workflow (Returns ID like: <code>40ef87b9-67f8-4c55-9d45-d5b2f8e7c123</code>)
                             </div>
                             
                             <div class="workflow-step">
@@ -3017,7 +3044,7 @@
                         </div>
 
                         <div class="doc-section">
-                            <h3>🔗 API Endpoints</h3>
+                            <h3>🔗 Local API Endpoints</h3>
                             
                             <div class="api-endpoint">
                                 <span class="api-method post">POST</span> /submit-application
@@ -3048,6 +3075,7 @@
                             <div class="json-code">{
   "success": true,
   "workflowId": "wf_a1b2c3d4",
+  "orkesWorkflowId": "40ef87b9-67f8-4c55-9d45-d5b2f8e7c123",
   "message": "Application submitted successfully"
 }</div>
                         </div>
@@ -3092,8 +3120,29 @@
                     title: '👥 Approver Dashboard - Technical Documentation', 
                     content: `
                         <div class="doc-section">
-                            <h3>📋 Overview</h3>
-                            <p>The Approver Dashboard provides department-specific interfaces for Finance, Legal, and Procurement teams to review and approve/reject vendor applications.</p>
+                            <h3>🎯 Primary Orkes Task Management</h3>
+                            <p><strong>Base URL:</strong> https://developer.orkescloud.com</p>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method get">GET</span> /api/workflow/{workflowId}?includeTasks=true
+                                <p>Get workflow with task IDs for approvers</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /api/tasks
+                                <p>Complete approver task with decision</p>
+                            </div>
+                            
+                            <h4>📋 Example: Complete Approver Task</h4>
+                            <div class="json-code">{
+  "workflowInstanceId": "40ef87b9-67f8-4c55-9d45-d5b2f8e7c123",
+  "taskId": "7d3a9f8b-2c45-4e67-8901-b2c3d4e5f6a7", 
+  "status": "COMPLETED",
+  "outputData": {
+    "is_approved": true,
+    "approval_status": "APPROVED"
+  }
+}</div>
                             
                             <div class="tech-badges">
                                 <span class="tech-badge nodejs">Node.js</span>
@@ -3104,10 +3153,10 @@
                         </div>
 
                         <div class="doc-section">
-                            <h3>🏢 Department Structure</h3>
-                            <p><strong>Finance Department (ID: 1)</strong> - 💰 finance.approver@sapco.com</p>
-                            <p><strong>Legal Department (ID: 2)</strong> - ⚖️ legal.approver@sapco.com</p>
-                            <p><strong>Procurement Department (ID: 3)</strong> - 📦 procurement.approver@sapco.com</p>
+                            <h3>🏢 Department Structure & Task References</h3>
+                            <p><strong>Finance Department (ID: 1)</strong> - 💰 finance@sapco.com - Task Ref: <code>approver_1_task_ref</code></p>
+                            <p><strong>Legal Department (ID: 2)</strong> - ⚖️ legal@sapco.com - Task Ref: <code>approver_2_task_ref</code></p>
+                            <p><strong>Procurement Department (ID: 3)</strong> - 📦 procurement@sapco.com - Task Ref: <code>approver_3_task_ref</code></p>
                         </div>
 
                         <div class="doc-section">
@@ -3160,6 +3209,7 @@
                             <h4>Approver Response Payload:</h4>
                             <div class="json-code">{
   "workflowId": "wf_a1b2c3d4",
+  "orkesWorkflowId": "40ef87b9-67f8-4c55-9d45-d5b2f8e7c123",
   "approverId": "1",
   "decision": "APPROVED", // or "REJECTED"
   "reason": "All financial requirements met" // Required for rejection
@@ -3171,6 +3221,7 @@
   "applications": [
     {
       "workflowId": "wf_a1b2c3d4",
+      "orkesWorkflowId": "40ef87b9-67f8-4c55-9d45-d5b2f8e7c123",
       "business_name": "ABC Corp",
       "applicant_email": "vendor@company.com", 
       "createdAt": "2024-01-15T10:30:00Z",
@@ -3192,7 +3243,8 @@
   "target_approver": "1",
   "approver_decision": "APPROVED",
   "rejection_reason": "",
-  "workflow_id": "wf_a1b2c3d4"
+  "workflowId": "40ef87b9-67f8-4c55-9d45-d5b2f8e7c123",
+  "taskId": "7d3a9f8b-2c45-4e67-8901-b2c3d4e5f6a7"
 }</div>
 
                             <p>This updates the Orkes workflow state and triggers the next step in the approval process.</p>
@@ -3204,12 +3256,39 @@
                     title: '📊 Applications Overview - Technical Documentation',
                     content: `
                         <div class="doc-section">
-                            <h3>📋 Overview</h3>
-                            <p>The Applications tab provides a comprehensive view of all vendor applications with real-time statistics, detailed application information, and approval timeline tracking.</p>
+                            <h3>🎯 Primary Orkes Workflow Status</h3>
+                            <p><strong>Base URL:</strong> https://developer.orkescloud.com</p>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method get">GET</span> /api/workflow/{workflowId}
+                                <p>Get workflow execution status and details</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method get">GET</span> /api/workflow/{workflowId}?includeTasks=true
+                                <p>Get full workflow with task details and approver progress</p>
+                            </div>
+                            
+                            <h4>📋 Example: Workflow Status Response</h4>
+                            <div class="json-code">{
+  "workflowId": "40ef87b9-67f8-4c55-9d45-d5b2f8e7c123",
+  "status": "RUNNING", 
+  "startTime": 1705315800000,
+  "endTime": null,
+  "tasks": [
+    {
+      "taskId": "7d3a9f8b-2c45-4e67-8901-b2c3d4e5f6a7",
+      "referenceTaskName": "approver_1_task_ref",
+      "taskType": "USER_TASK",
+      "status": "COMPLETED"
+    }
+  ]
+}</div>
                             
                             <div class="tech-badges">
                                 <span class="tech-badge nodejs">Node.js</span>
                                 <span class="tech-badge express">Express</span>
+                                <span class="tech-badge orkes">Orkes</span>
                                 <span class="tech-badge">JSON Storage</span>
                             </div>
                         </div>
@@ -3314,12 +3393,36 @@
                     title: '📋 Transaction History - Technical Documentation',
                     content: `
                         <div class="doc-section">
-                            <h3>📋 Overview</h3>
-                            <p>The Transactions tab provides a comprehensive audit trail of all system activities including submissions, approver decisions, webhook events, and system errors.</p>
+                            <h3>🎯 Primary Orkes Webhook Integration</h3>
+                            <p><strong>Orkes Base URL:</strong> https://developer.orkescloud.com</p>
+                            <p><strong>Local Webhook Endpoints:</strong> Receive completion notifications from Orkes</p>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /webhook/completion
+                                <p>Handles final approval webhooks from Orkes workflow completion</p>
+                            </div>
+                            
+                            <div class="api-endpoint">
+                                <span class="api-method post">POST</span> /rejection
+                                <p>Handles rejection webhooks with detailed department reasons</p>
+                            </div>
+                            
+                            <h4>📋 Example: Webhook Completion Payload</h4>
+                            <div class="json-code">{
+  "workflowType": "onboarding_approval_workflow_v3",
+  "workflowInstanceId": "40ef87b9-67f8-4c55-9d45-d5b2f8e7c123",
+  "status": "COMPLETED",
+  "endTime": 1705316400000,
+  "output": {
+    "final_status": "APPROVED",
+    "approved_by_all": true
+  }
+}</div>
                             
                             <div class="tech-badges">
                                 <span class="tech-badge nodejs">Node.js</span>
                                 <span class="tech-badge express">Express</span>
+                                <span class="tech-badge orkes">Orkes Webhooks</span>
                                 <span class="tech-badge">Audit Trail</span>
                             </div>
                         </div>
@@ -3416,7 +3519,7 @@
 
                             <h4>Rejection Webhook Payload:</h4>
                             <div class="json-code">{
-  "workflowInstanceId": "orkes_workflow_123",
+  "workflowInstanceId": "40ef87b9-67f8-4c55-9d45-d5b2f8e7c123",
   "taskType": "rejection_task", 
   "outputData": {
     "rejection_reason": "Missing compliance docs",
